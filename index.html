@@ -8,7 +8,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
     html, body { width: 100%; height: 100%; }
     body {
-      background: linear-gradient(160deg, #ffb6c1, #ff8fab);
+      background: #f2f2f7;
       min-height: 100vh;
       overflow-y: auto;
       position: relative;
@@ -28,7 +28,7 @@
     .watermark span {
       font-size: 1.4rem;
       font-weight: 800;
-      color: rgba(255,255,255,0.35);
+      color: rgba(0,0,0,0.05);
       transform: rotate(-28deg);
       white-space: nowrap;
       letter-spacing: 2px;
@@ -76,42 +76,90 @@
 
     .hidden-input { display: none; }
 
-    /* ===== 4 square category tiles ===== */
+    /* ===== 5 category tiles ===== */
     .tile-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
       gap: 12px;
-      max-width: 420px;
+      max-width: 480px;
       margin: 0 auto;
     }
     .tile {
       aspect-ratio: 1 / 1;
-      background: rgba(255,255,255,0.55);
-      border: 2px solid rgba(255,255,255,0.8);
+      background: rgba(255,255,255,0.6);
+      border: 1.5px solid rgba(255,255,255,0.8);
       border-radius: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
       cursor: pointer;
-      transition: 0.15s;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      transition: 0.12s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      padding: 4px;
     }
     .tile:active { transform: scale(0.94); background: #d81b60; }
     .tile:active .tile-name, .tile:active .tile-count { color: white; }
-    .tile .tile-icon { font-size: 2.4rem; }
-    .tile .tile-name { font-weight: 700; font-size: 0.9rem; color: #333; }
-    .tile .tile-count { font-size: 0.65rem; color: #666; }
-    .tile-video { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(216,27,96,0.15)); }
-    .tile-images { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(46,125,50,0.15)); }
-    .tile-pdf { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(106,27,154,0.15)); }
-    .tile-camera { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(21,101,192,0.15)); }
+    .tile .tile-icon { font-size: 1.8rem; }
+    .tile .tile-name { font-weight: 600; font-size: 0.7rem; color: #333; text-align: center; }
+    .tile .tile-count { font-size: 0.55rem; color: #666; }
+    .tile-video { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(216,27,96,0.08)); }
+    .tile-music { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(46,125,50,0.08)); }
+    .tile-images { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(106,27,154,0.08)); }
+    .tile-pdf { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(21,101,192,0.08)); }
+    .tile-camera { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(0,0,0,0.04)); }
+
+    /* ===== Folder + File list ===== */
+    .file-list-view { display: none; }
+    .back-btn {
+      background: #d81b60;
+      color: white;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 10px;
+      font-size: 0.78rem;
+    }
+    .back-btn:active { transform: scale(0.95); }
+    .list-title { text-align:center; font-weight:700; color:#d81b60; margin-bottom: 8px; font-size: 0.95rem; }
+
+    .folder-list, .file-list { max-height: calc(100vh - 180px); overflow-y: auto; }
+    .folder-item {
+      background: rgba(255,255,255,0.7);
+      padding: 10px 12px;
+      margin: 4px 0;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .folder-item:active { background: #d81b60; color: white; }
+    .file-item {
+      background: rgba(255,255,255,0.5);
+      padding: 8px 12px;
+      margin: 3px 0;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.82rem;
+    }
+    .file-item:active { background: #d81b60; color: white; }
+    .file-item .ficon { font-size: 1.2rem; }
+    .file-item .fname { flex: 1; word-break: break-word; }
 
     /* ===== Scan modal ===== */
     .modal-overlay {
       position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.4);
       z-index: 500;
       display: none;
       align-items: flex-end;
@@ -154,40 +202,7 @@
       font-size: 0.85rem;
     }
 
-    /* ===== File list ===== */
-    .file-list-view { display: none; }
-    .back-btn {
-      background: #d81b60;
-      color: white;
-      border: none;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-bottom: 10px;
-      font-size: 0.78rem;
-    }
-    .back-btn:active { transform: scale(0.95); }
-    .list-title { text-align:center; font-weight:700; color:#d81b60; margin-bottom: 8px; font-size: 0.95rem; }
-
-    .file-list { max-height: calc(100vh - 140px); overflow-y: auto; }
-    .file-item {
-      background: rgba(255,255,255,0.6);
-      padding: 10px 12px;
-      margin: 4px 0;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      font-size: 0.85rem;
-    }
-    .file-item:active { background: #d81b60; color: white; }
-    .file-item .ficon { font-size: 1.3rem; }
-    .file-item .fname { flex: 1; word-break: break-word; }
-    .file-item .fmenu { font-size: 1.2rem; padding: 0 4px; }
-
-    /* ========== PLAYER (video / audio) ========== */
+    /* ===== Player ===== */
     .player-overlay {
       position: fixed; inset: 0;
       background: #000;
@@ -226,7 +241,6 @@
     #imagePlayer { width: 100%; height: 100%; object-fit: contain; }
     .player-content iframe { width: 100%; height: 100%; border: none; background: #333; }
 
-    /* Vertical side sliders for video: brightness (left) / volume (right) */
     .side-slider {
       position: absolute;
       top: 50%;
@@ -271,10 +285,7 @@
     .player-controls button { background: none; border: none; color: white; font-size: 1.35rem; }
     .player-controls .play-btn { font-size: 2rem; color: #d81b60; }
 
-    .audio-wrap { color: white; text-align: center; padding: 20px; }
-    .audio-wrap .a-icon { font-size: 3.5rem; }
-
-    /* ========== CAMERA ========== */
+    /* ===== CAMERA - Instagram style ===== */
     .camera-overlay {
       position: fixed; inset: 0;
       background: #000;
@@ -283,113 +294,144 @@
       flex-direction: column;
     }
     .camera-overlay.active { display: flex; }
-    #camera-video { position: absolute; width: 2px; height: 2px; opacity: 0; pointer-events: none; }
-    #previewCanvas {
-      width: 100%; height: 100%;
+    #camera-video {
+      position: absolute;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       background: #000;
     }
-    #recordCanvas { display: none; }
+    #previewCanvas { display: none; }
 
     .cam-zoom-control {
-      position: absolute; right: 10px; top: 45%;
+      position: absolute; right: 12px; top: 45%;
       transform: translateY(-50%); z-index: 15;
-      background: rgba(0,0,0,0.45); backdrop-filter: blur(8px);
-      border-radius: 25px; padding: 10px 4px;
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(8px);
+      border-radius: 30px;
+      padding: 12px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
     }
     .cam-zoom-control .z-label { color: white; font-size: 0.6rem; font-weight: 700; }
-    .cam-zoom-control .zoom-slider-wrap { width: 34px; height: 90px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .cam-zoom-control .zoom-slider-wrap { width: 30px; height: 100px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
     .cam-zoom-control input[type="range"] {
       -webkit-appearance: none; appearance: none;
-      width: 80px; height: 4px;
-      background: rgba(255,255,255,0.35);
+      width: 80px; height: 3px;
+      background: rgba(255,255,255,0.3);
       border-radius: 2px; outline: none;
       transform: rotate(-90deg); transform-origin: center;
     }
     .cam-zoom-control input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none; appearance: none;
-      width: 16px; height: 16px; border-radius: 50%;
-      background: #d81b60; cursor: pointer;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #fff; cursor: pointer;
+      border: 2px solid #d81b60;
     }
 
     .camera-controls {
-      position: absolute; bottom: 22px; left: 0; width: 100%;
-      padding: 0 14px; display: flex; justify-content: space-around; align-items: center; z-index: 10;
+      position: absolute; bottom: 30px; left: 0; width: 100%;
+      padding: 0 20px; display: flex; justify-content: space-around; align-items: center; z-index: 10;
     }
     .cam-shutter {
-      width: 64px; height: 64px; border-radius: 50%;
-      background: white; border: 4px solid rgba(255,255,255,0.5);
-      cursor: pointer; transition: 0.1s; box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      width: 68px; height: 68px; border-radius: 50%;
+      background: white; border: 4px solid rgba(255,255,255,0.3);
+      cursor: pointer; transition: 0.1s; box-shadow: 0 0 30px rgba(0,0,0,0.4);
     }
-    .cam-shutter:active { transform: scale(0.8); }
-    .cam-shutter.recording { background: #e74c3c; border-radius: 16px; width: 34px; height: 34px; margin: 15px; }
+    .cam-shutter:active { transform: scale(0.85); }
+    .cam-shutter.recording { background: #e74c3c; border-radius: 12px; width: 40px; height: 40px; margin: 14px; border-color: #e74c3c; }
     .cam-btn {
-      background: rgba(255,255,255,0.2); border: none; color: white;
-      padding: 6px 14px; border-radius: 25px; font-size: 0.8rem; font-weight: 600; backdrop-filter: blur(8px);
+      background: rgba(255,255,255,0.15);
+      border: none; color: white;
+      padding: 6px 14px; border-radius: 25px;
+      font-size: 0.8rem; font-weight: 600;
+      backdrop-filter: blur(8px);
+      min-width: 50px;
     }
     .cam-btn:active { transform: scale(0.9); }
-    .flash-btn.on { background: #ffd700; color: #000; }
-    .camera-flash {
-      position: absolute; inset: 0; background: white; opacity: 0;
-      pointer-events: none; z-index: 5; transition: opacity 0.05s;
-    }
-    .camera-flash.active { opacity: 0.9; }
 
     .mode-toggle-row {
-      position: absolute; bottom: 168px; left: 0; width: 100%;
-      display: flex; justify-content: center; gap: 6px; z-index: 10;
+      position: absolute; bottom: 116px; left: 0; width: 100%;
+      display: flex; justify-content: center; gap: 10px; z-index: 10;
     }
     .mode-btn {
-      background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); border: none;
-      color: rgba(255,255,255,0.65); padding: 5px 18px; border-radius: 20px;
+      background: rgba(0,0,0,0.35); backdrop-filter: blur(8px); border: none;
+      color: rgba(255,255,255,0.6); padding: 5px 22px; border-radius: 20px;
       font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;
     }
-    .mode-btn.active { color: #d81b60; background: rgba(255,255,255,0.92); }
+    .mode-btn.active { color: #fff; background: rgba(255,255,255,0.2); }
 
     .rec-timer {
-      position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      background: rgba(216,27,96,0.9); color: white; padding: 4px 12px; border-radius: 20px;
-      font-size: 0.75rem; font-weight: 700; display: none; align-items: center; gap: 5px; z-index: 15;
+      position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+      color: white; padding: 4px 14px; border-radius: 20px;
+      font-size: 0.8rem; font-weight: 600; display: none; align-items: center; gap: 6px; z-index: 15;
     }
     .rec-timer.active { display: flex; }
-    .rec-dot { width: 8px; height: 8px; border-radius: 50%; background: white; animation: blink 1s infinite; }
-    @keyframes blink { 50% { opacity: 0.3; } }
+    .rec-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff3b30; animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0.2; } }
 
+    /* filter row - instagram style */
     .filter-row {
-      position: absolute; bottom: 100px; left: 0; width: 100%;
-      padding: 4px 10px; display: flex; gap: 4px; overflow-x: auto; z-index: 10;
-      background: rgba(0,0,0,0.4); backdrop-filter: blur(12px);
+      position: absolute; bottom: 180px; left: 0; width: 100%;
+      padding: 6px 12px; display: flex; gap: 6px; overflow-x: auto; z-index: 10;
+      background: linear-gradient(to top, rgba(0,0,0,0.2), transparent);
+      backdrop-filter: blur(4px);
+      padding-top: 20px;
     }
     .filter-row::-webkit-scrollbar { display: none; }
-    .filter-item { flex: 0 0 55px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 3px; border-radius: 8px; }
+    .filter-item {
+      flex: 0 0 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 4px 2px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.1s;
+    }
     .filter-item:active { transform: scale(0.9); }
-    .filter-item.active { background: rgba(216, 27, 96, 0.3); border-radius: 10px; }
-    .filter-preview { width: 44px; height: 44px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); background: #333; }
-    .filter-item.active .filter-preview { border-color: #d81b60; box-shadow: 0 0 12px rgba(216, 27, 96, 0.4); }
-    .filter-name { font-size: 0.5rem; color: white; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.8); white-space: nowrap; }
-    .filter-item.active .filter-name { color: #d81b60; }
+    .filter-item.active { background: rgba(255,255,255,0.15); border-radius: 12px; }
+    .filter-preview {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: #333;
+      object-fit: cover;
+    }
+    .filter-item.active .filter-preview { border-color: #fff; box-shadow: 0 0 16px rgba(255,255,255,0.2); }
+    .filter-name { font-size: 0.5rem; color: white; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.6); white-space: nowrap; }
+    .filter-item.active .filter-name { color: #fff; }
+
+    /* photo preview flash */
+    .camera-flash {
+      position: absolute; inset: 0; background: white; opacity: 0;
+      pointer-events: none; z-index: 8; transition: opacity 0.08s;
+    }
+    .camera-flash.active { opacity: 0.7; }
 
     .toast-msg {
-      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.8); color: white; padding: 6px 16px; border-radius: 20px;
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.75); color: white; padding: 6px 18px; border-radius: 20px;
       font-size: 0.75rem; opacity: 0; transition: 0.3s; z-index: 9999; pointer-events: none;
     }
     .toast-msg.show { opacity: 1; }
 
     .loading-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99999;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999;
       display: none; justify-content: center; align-items: center; flex-direction: column;
     }
     .loading-overlay.active { display: flex; }
-    .spinner { width: 35px; height: 35px; border: 4px solid #f3f3f3; border-top: 4px solid #d81b60; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    .spinner { width: 32px; height: 32px; border: 3px solid #f3f3f3; border-top: 3px solid #d81b60; border-radius: 50%; animation: spin 0.7s linear infinite; }
     .loading-text { color: white; margin-top: 8px; font-size: 0.8rem; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-<div class="watermark" id="homeWatermark"><span>my-photos.jpg &nbsp;&nbsp;&nbsp; my-photos.jpg &nbsp;&nbsp;&nbsp; my-photos.jpg</span></div>
+<div class="watermark" id="homeWatermark"><span>my-photos.jpg &nbsp; my-photos.jpg</span></div>
 
 <div class="container" id="app">
   <div class="app-header"><h1>📱 Mahi-Media Pro</h1></div>
@@ -405,40 +447,49 @@
       <div class="tile tile-video" onclick="openCategory('video')">
         <span class="tile-icon">🎬</span>
         <span class="tile-name">Video</span>
-        <span class="tile-count" id="countVideo">0 files</span>
+        <span class="tile-count" id="countVideo">0</span>
+      </div>
+      <div class="tile tile-music" onclick="openCategory('audio')">
+        <span class="tile-icon">🎵</span>
+        <span class="tile-name">Music</span>
+        <span class="tile-count" id="countAudio">0</span>
       </div>
       <div class="tile tile-images" onclick="openCategory('image')">
         <span class="tile-icon">🖼️</span>
         <span class="tile-name">Images</span>
-        <span class="tile-count" id="countImage">0 files</span>
+        <span class="tile-count" id="countImage">0</span>
       </div>
       <div class="tile tile-pdf" onclick="openCategory('pdf')">
         <span class="tile-icon">📄</span>
         <span class="tile-name">PDF</span>
-        <span class="tile-count" id="countPdf">0 files</span>
+        <span class="tile-count" id="countPdf">0</span>
       </div>
       <div class="tile tile-camera" onclick="openCamera()">
         <span class="tile-icon">📷</span>
         <span class="tile-name">Camera</span>
-        <span class="tile-count">Beauty+</span>
+        <span class="tile-count">✨ Pro</span>
       </div>
     </div>
   </div>
 
   <div id="fileView" class="file-list-view">
     <button class="back-btn" onclick="showHome()">⬅ Back</button>
-    <div class="list-title" id="listTitle">Files</div>
-    <div class="file-list" id="fileList"></div>
+    <div class="list-title" id="listTitle">📂 Folders</div>
+    <div id="folderContainer"></div>
+    <div id="fileContainer" style="display:none;">
+      <button class="back-btn" style="margin-bottom:6px;" onclick="showFolders()">📁 Back to Folders</button>
+      <div class="list-title" id="subListTitle">Files</div>
+      <div class="file-list" id="fileList"></div>
+    </div>
   </div>
 </div>
 
 <!-- Scan Modal -->
 <div class="modal-overlay" id="scanModal">
   <div class="modal-sheet">
-    <h3>Scan Type Choose Karo</h3>
-    <div class="modal-option" onclick="closeScanModal();selectFiles()"><span class="opt-icon">📄</span> File Scan (select multiple files)</div>
-    <div class="modal-option" onclick="closeScanModal();selectFolder()"><span class="opt-icon">📁</span> Folder Scan (ek folder pura)</div>
-    <div class="modal-option" onclick="closeScanModal();selectFolder()"><span class="opt-icon">🌐</span> Full Scan (jitna device allow kare)</div>
+    <h3>📂 Scan Type</h3>
+    <div class="modal-option" onclick="closeScanModal();selectFiles()"><span class="opt-icon">📄</span> Files (multiple)</div>
+    <div class="modal-option" onclick="closeScanModal();selectFolder()"><span class="opt-icon">📁</span> Folder (full scan)</div>
     <button class="modal-cancel" onclick="closeScanModal()">Cancel</button>
   </div>
 </div>
@@ -454,12 +505,11 @@
     <video id="videoPlayer" playsinline></video>
     <img id="imagePlayer" src="">
     <iframe id="pdfPlayer"></iframe>
-    <div id="audioPlayer" class="audio-wrap" style="display:none;">
-      <div class="a-icon">🎵</div>
+    <div id="audioPlayer" class="audio-wrap" style="display:none;color:white;text-align:center;padding:20px;">
+      <div style="font-size:3rem;">🎵</div>
       <div style="margin-top:8px;font-size:0.85rem;font-weight:600;" id="audioName"></div>
       <audio id="audioElem" controls style="width:90%;max-width:300px;margin-top:12px;"></audio>
     </div>
-
     <div class="side-slider left" id="brightnessControl" style="display:none;">
       <span class="s-icon">☀️</span>
       <div class="side-slider-wrap"><input type="range" id="brightnessSlider" min="0.4" max="1.8" step="0.05" value="1" oninput="updateBrightness(this.value)"></div>
@@ -476,29 +526,26 @@
   </div>
 </div>
 
-<!-- Camera -->
+<!-- Camera (Instagram style) -->
 <div class="camera-overlay" id="cameraOverlay">
   <video id="camera-video" autoplay playsinline muted></video>
-  <canvas id="previewCanvas"></canvas>
-  <canvas id="recordCanvas"></canvas>
   <div class="camera-flash" id="cameraFlash"></div>
 
   <div class="rec-timer" id="recTimer"><span class="rec-dot"></span><span id="recTimeText">00:00</span></div>
 
   <div class="cam-zoom-control">
     <span class="z-label" id="zoomLabel">1.0x</span>
-    <div class="zoom-slider-wrap"><input type="range" id="zoomSlider" min="1" max="5" step="0.1" value="1" oninput="updateZoom(this.value)"></div>
+    <div class="zoom-slider-wrap"><input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1" oninput="updateZoom(this.value)"></div>
   </div>
 
   <div class="mode-toggle-row">
-    <button class="mode-btn active" id="modePhotoBtn" onclick="setCameraMode('photo')">PHOTO</button>
-    <button class="mode-btn" id="modeVideoBtn" onclick="setCameraMode('video')">VIDEO</button>
+    <button class="mode-btn active" id="modePhotoBtn" onclick="setCameraMode('photo')">📸 PHOTO</button>
+    <button class="mode-btn" id="modeVideoBtn" onclick="setCameraMode('video')">🎥 VIDEO</button>
   </div>
 
   <div class="filter-row" id="filterRow"></div>
 
   <div class="camera-controls">
-    <button class="cam-btn flash-btn" id="flashBtn" onclick="toggleFlash()" style="display:none;">⚡ Off</button>
     <button class="cam-btn" onclick="closeCamera()">✖</button>
     <div class="cam-shutter" id="shutterBtn" onclick="handleShutter()"></div>
     <button class="cam-btn" onclick="switchCamera()">🔄</button>
@@ -519,10 +566,14 @@ const DB_NAME = "MahiMediaDB";
 let db = null;
 function initDB() {
   return new Promise((resolve) => {
-    const req = indexedDB.open(DB_NAME, 1);
+    const req = indexedDB.open(DB_NAME, 2);
     req.onupgradeneeded = (e) => {
       const d = e.target.result;
-      if (!d.objectStoreNames.contains("media")) d.createObjectStore("media", { keyPath: "id", autoIncrement: true });
+      if (!d.objectStoreNames.contains("media")) {
+        const store = d.createObjectStore("media", { keyPath: "id", autoIncrement: true });
+        store.createIndex("folder", "folder", { unique: false });
+        store.createIndex("type", "type", { unique: false });
+      }
     };
     req.onsuccess = (e) => { db = e.target.result; resolve(db); };
   });
@@ -573,9 +624,11 @@ let allFiles = [];
 let currentPlaylist = [];
 let currentIndex = 0;
 let currentPlayer = null;
+let currentCategory = '';
+let currentFolder = '';
 
 // ================================================================
-// SCAN MODAL + FILE SELECTION
+// SCAN
 // ================================================================
 function openScanModal() { document.getElementById('scanModal').classList.add('active'); }
 function closeScanModal() { document.getElementById('scanModal').classList.remove('active'); }
@@ -604,16 +657,17 @@ async function handleFileSelect(e) {
 }
 
 // ================================================================
-// UI — HOME + CATEGORY LISTS
+// UI — HOME + CATEGORY + FOLDERS
 // ================================================================
 async function refreshData() {
   allFiles = await loadAllFiles();
   document.getElementById('status').innerHTML = `📂 ${allFiles.length} files total`;
-  const counts = { video:0, image:0, pdf:0 };
+  const counts = { video:0, audio:0, image:0, pdf:0 };
   allFiles.forEach(f => { if (counts[f.type] !== undefined) counts[f.type]++; });
-  document.getElementById('countVideo').textContent = counts.video + ' files';
-  document.getElementById('countImage').textContent = counts.image + ' files';
-  document.getElementById('countPdf').textContent = counts.pdf + ' files';
+  document.getElementById('countVideo').textContent = counts.video;
+  document.getElementById('countAudio').textContent = counts.audio;
+  document.getElementById('countImage').textContent = counts.image;
+  document.getElementById('countPdf').textContent = counts.pdf;
   showHome();
 }
 
@@ -621,48 +675,77 @@ function showHome() {
   document.getElementById('homeView').style.display = 'block';
   document.getElementById('fileView').style.display = 'none';
   document.getElementById('homeWatermark').style.display = 'flex';
+  document.getElementById('fileContainer').style.display = 'none';
+  document.getElementById('folderContainer').style.display = 'block';
 }
 
-const catMeta = { video: { icon:'🎬', label:'Video' }, image: { icon:'🖼️', label:'Images' }, pdf: { icon:'📄', label:'PDF' } };
+function showFolders() {
+  document.getElementById('fileContainer').style.display = 'none';
+  document.getElementById('folderContainer').style.display = 'block';
+  document.getElementById('listTitle').textContent = `📂 ${currentCategory.toUpperCase()} Folders`;
+}
+
+const catMeta = {
+  video: { icon:'🎬', label:'Video' },
+  audio: { icon:'🎵', label:'Music' },
+  image: { icon:'🖼️', label:'Images' },
+  pdf: { icon:'📄', label:'PDF' }
+};
 
 function openCategory(type) {
-  currentPlaylist = allFiles.filter(f => f.type === type);
+  currentCategory = type;
+  const filtered = allFiles.filter(f => f.type === type);
+  const folders = [...new Set(filtered.map(f => f.folder))].sort();
+  
   document.getElementById('homeView').style.display = 'none';
   document.getElementById('fileView').style.display = 'block';
   document.getElementById('homeWatermark').style.display = 'none';
-  document.getElementById('listTitle').textContent = `${catMeta[type].icon} ${catMeta[type].label} (${currentPlaylist.length})`;
-  const list = document.getElementById('fileList');
-  list.innerHTML = '';
-  if (!currentPlaylist.length) {
-    list.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">Koi file nahi mili. Scan karo pehle.</p>';
+  document.getElementById('folderContainer').style.display = 'block';
+  document.getElementById('fileContainer').style.display = 'none';
+  
+  document.getElementById('listTitle').textContent = `📂 ${catMeta[type].icon} ${catMeta[type].label} (${filtered.length})`;
+  
+  const container = document.getElementById('folderContainer');
+  container.innerHTML = '';
+  
+  if (!folders.length) {
+    container.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No folders found. Scan some files first.</p>';
     return;
   }
-  currentPlaylist.forEach(item => {
-    const globalIdx = allFiles.indexOf(item);
+  
+  folders.forEach(folder => {
+    const count = filtered.filter(f => f.folder === folder).length;
     const div = document.createElement('div');
-    div.className = 'file-item';
-    div.innerHTML = `<span class="ficon">${catMeta[type].icon}</span><span class="fname">${item.name}</span><span class="fmenu" onclick="event.stopPropagation();showFileMenu(${item.id}, '${item.name.replace(/'/g,"\\'")}')">⋮</span>`;
-    div.onclick = () => playFile(globalIdx);
-    list.appendChild(div);
+    div.className = 'folder-item';
+    div.innerHTML = `📁 ${folder} <span style="margin-left:auto;font-weight:400;font-size:0.7rem;color:#888;">${count}</span>`;
+    div.onclick = () => openFolder(type, folder);
+    container.appendChild(div);
   });
 }
 
-function showFileMenu(id, name) {
-  const action = prompt(`Rename or type 'delete':\n${name}`, name);
-  if (action === null) return;
-  if (action.toLowerCase().trim() === 'delete') {
-    if (confirm('Delete this file?')) { deleteFile(id).then(refreshData); showToast('🗑️ Deleted'); }
-  } else if (action.trim() && action.trim() !== name) {
-    const tx = db.transaction("media", "readwrite");
-    const store = tx.objectStore("media");
-    const req = store.get(id);
-    req.onsuccess = () => {
-      const data = req.result;
-      data.name = action.trim();
-      store.put(data);
-      tx.oncomplete = () => { refreshData(); showToast('✏️ Renamed'); };
-    };
+function openFolder(type, folder) {
+  currentFolder = folder;
+  const files = allFiles.filter(f => f.type === type && f.folder === folder);
+  currentPlaylist = files;
+  
+  document.getElementById('folderContainer').style.display = 'none';
+  document.getElementById('fileContainer').style.display = 'block';
+  document.getElementById('subListTitle').textContent = `📁 ${folder} (${files.length})`;
+  
+  const list = document.getElementById('fileList');
+  list.innerHTML = '';
+  if (!files.length) {
+    list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No files</p>';
+    return;
   }
+  files.forEach(item => {
+    const globalIdx = allFiles.indexOf(item);
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    div.innerHTML = `<span class="ficon">${catMeta[type].icon}</span><span class="fname">${item.name}</span>`;
+    div.onclick = () => playFile(globalIdx);
+    list.appendChild(div);
+  });
 }
 
 // ================================================================
@@ -688,6 +771,7 @@ function playFile(index) {
   video.style.filter = 'brightness(1)';
   document.getElementById('brightnessSlider').value = 1;
   document.getElementById('volumeSlider').value = 1;
+  
   const url = URL.createObjectURL(item.blob);
   if (item.type === 'video') {
     video.style.display = 'block'; video.src = url; video.play(); currentPlayer = video;
@@ -720,16 +804,14 @@ function closePlayer() {
   if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
 }
 
-async function toggleFullscreenPlayer() {
+function toggleFullscreenPlayer() {
   const el = document.getElementById('playerOverlay');
   try {
     if (!document.fullscreenElement) {
-      await el.requestFullscreen();
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(()=>{});
-      }
+      el.requestFullscreen();
+      if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{});
     } else {
-      await document.exitFullscreen();
+      document.exitFullscreen();
     }
   } catch (e) { showToast('⛶ Fullscreen not supported'); }
 }
@@ -753,95 +835,65 @@ document.addEventListener('ended', () => {
 }, true);
 
 // ================================================================
-// CAMERA — canvas-based live pipeline (preview = exact capture)
+// CAMERA — Instagram-style: direct video, NO canvas preview
 // ================================================================
 let cameraStream = null;
 let facingMode = 'environment';
-let currentFilter = 'normal';
 let cameraZoom = 1;
 let cameraMode = 'photo';
-let torchSupported = false;
-let torchOn = false;
 let isRecording = false;
 let mediaRecorder = null;
 let recordedChunks = [];
 let recordTimerInterval = null;
 let recordSeconds = 0;
-let previewLoopId = null;
-let drawLoopId = null;
 
-// Beauty Plus = soft glow/skin-smooth blend (two-pass composite).
-// Others = single-pass native browser color-grade filters.
-const FILTERS = {
-  normal:     { name: 'Normal',    preview: '#888',    css: 'none' },
-  beautyplus: { name: 'Beauty+',   preview: '#ffd9e6',  css: 'brightness(1.14) contrast(0.94) saturate(1.1)', beauty: true },
-  nature:     { name: 'Nature',    preview: '#8fbc6a',  css: 'saturate(1.3) contrast(1.08) brightness(1.02)' },
-  summer:     { name: 'Summer',    preview: '#f7dc6f',  css: 'saturate(1.75) contrast(1.28) brightness(1.08)' },
-  clarendon:  { name: 'Clarendon', preview: '#f4a460',  css: 'contrast(1.22) saturate(1.35) brightness(1.05)' },
-  vibrant:    { name: 'Vibrant',   preview: '#e74c3c',  css: 'saturate(1.85) contrast(1.18)' },
-  cool:       { name: 'Cool',      preview: '#5dade2',  css: 'hue-rotate(-8deg) saturate(1.15) brightness(1.03) contrast(1.05)' },
-  warm:       { name: 'Warm',      preview: '#f0b27a',  css: 'sepia(0.25) saturate(1.25) brightness(1.05)' },
-  bw:         { name: 'B&W',       preview: '#555',     css: 'grayscale(1) contrast(1.18) brightness(1.05)' }
-};
+// Instagram-style filters (real CSS filter applied directly to video)
+const FILTERS = [
+  { id: 'normal', name: 'Normal', css: 'none' },
+  { id: 'clarendon', name: 'Clarendon', css: 'contrast(1.2) saturate(1.35) brightness(1.05)' },
+  { id: 'gingham', name: 'Gingham', css: 'contrast(1.1) saturate(0.85) brightness(1.05) sepia(0.1)' },
+  { id: 'moon', name: 'Moon', css: 'grayscale(0.7) contrast(1.3) brightness(1.1)' },
+  { id: 'lark', name: 'Lark', css: 'contrast(1.15) saturate(1.4) brightness(1.08)' },
+  { id: 'reyes', name: 'Reyes', css: 'contrast(1.2) brightness(1.15) saturate(0.9) sepia(0.08)' },
+  { id: 'juno', name: 'Juno', css: 'contrast(1.3) saturate(1.2) brightness(1.1) hue-rotate(-5deg)' },
+  { id: 'slumber', name: 'Slumber', css: 'contrast(1.1) brightness(1.1) saturate(0.8) hue-rotate(-10deg)' },
+  { id: 'crema', name: 'Crema', css: 'contrast(1.15) brightness(1.2) saturate(0.9) sepia(0.15)' },
+  { id: 'ludwig', name: 'Ludwig', css: 'contrast(1.2) brightness(1.1) saturate(1.1) sepia(0.05)' }
+];
+
+let currentFilter = 'normal';
 
 function initCameraUI() {
   const row = document.getElementById('filterRow');
   row.innerHTML = '';
-  Object.keys(FILTERS).forEach(key => {
+  FILTERS.forEach(f => {
     const item = document.createElement('div');
-    item.className = `filter-item ${key === currentFilter ? 'active' : ''}`;
+    item.className = `filter-item ${f.id === currentFilter ? 'active' : ''}`;
     const preview = document.createElement('div');
     preview.className = 'filter-preview';
-    preview.style.background = FILTERS[key].preview;
+    // generate gradient preview
+    const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd', '#ff9f43', '#00d2d3', '#f368e0'];
+    const c = colors[(FILTERS.indexOf(f) * 3) % colors.length];
+    preview.style.background = `linear-gradient(135deg, ${c}, ${c}dd)`;
     const name = document.createElement('span');
     name.className = 'filter-name';
-    name.textContent = FILTERS[key].name;
+    name.textContent = f.name;
     item.appendChild(preview); item.appendChild(name);
     item.onclick = () => {
-      currentFilter = key;
+      currentFilter = f.id;
       document.querySelectorAll('.filter-item').forEach(c => c.classList.remove('active'));
       item.classList.add('active');
-      showToast(`📸 ${FILTERS[key].name}`);
+      applyFilterToVideo(currentFilter);
+      showToast(`📸 ${f.name}`);
     };
     row.appendChild(item);
   });
 }
 
-// Shared render function — used by LIVE PREVIEW, PHOTO capture, and VIDEO
-// recording, so what you see is exactly what gets saved.
-function renderFilteredFrame(ctx, source, w, h, zoom, facing, filterKey) {
-  const sw = w / zoom, sh = h / zoom, sx = (w - sw) / 2, sy = (h - sh) / 2;
-  const f = FILTERS[filterKey] || FILTERS.normal;
-  ctx.save();
-  if (facing === 'user') { ctx.translate(w, 0); ctx.scale(-1, 1); }
-  if (f.beauty) {
-    ctx.globalAlpha = 1;
-    ctx.filter = f.css;
-    ctx.drawImage(source, sx, sy, sw, sh, 0, 0, w, h);
-    ctx.filter = f.css + ' blur(5px)';
-    ctx.globalAlpha = 0.42;
-    ctx.drawImage(source, sx, sy, sw, sh, 0, 0, w, h);
-    ctx.globalAlpha = 1;
-  } else {
-    ctx.filter = f.css;
-    ctx.drawImage(source, sx, sy, sw, sh, 0, 0, w, h);
-  }
-  ctx.restore();
-}
-
-function startPreviewLoop() {
+function applyFilterToVideo(filterId) {
   const video = document.getElementById('camera-video');
-  const canvas = document.getElementById('previewCanvas');
-  const ctx = canvas.getContext('2d');
-  function loop() {
-    if (!document.getElementById('cameraOverlay').classList.contains('active')) { previewLoopId = null; return; }
-    const w = video.videoWidth || 1280, h = video.videoHeight || 720;
-    if (canvas.width !== w) canvas.width = w;
-    if (canvas.height !== h) canvas.height = h;
-    if (w && h) renderFilteredFrame(ctx, video, w, h, cameraZoom, facingMode, currentFilter);
-    previewLoopId = requestAnimationFrame(loop);
-  }
-  loop();
+  const f = FILTERS.find(f => f.id === filterId) || FILTERS[0];
+  video.style.filter = f.css;
 }
 
 async function openCamera() {
@@ -852,17 +904,20 @@ async function openCamera() {
   cameraZoom = 1;
   try {
     if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
-    const baseVideo = { facingMode: facingMode, width: { ideal: 1080 }, height: { ideal: 1920 } };
+    const constraints = {
+      video: { facingMode: facingMode, width: { ideal: 1080 }, height: { ideal: 1920 } },
+      audio: true
+    };
     try {
-      cameraStream = await navigator.mediaDevices.getUserMedia({ video: baseVideo, audio: true });
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
     } catch (audioErr) {
-      cameraStream = await navigator.mediaDevices.getUserMedia({ video: baseVideo, audio: false });
+      constraints.audio = false;
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
     }
     const v = document.getElementById('camera-video');
     v.srcObject = cameraStream;
     await v.play();
-    checkTorchSupport();
-    startPreviewLoop();
+    applyFilterToVideo(currentFilter);
     showToast('📷 Camera ready');
   } catch (err) {
     alert('❌ Camera access denied!\nPlease allow camera permission.');
@@ -872,31 +927,14 @@ async function openCamera() {
 
 function closeCamera() {
   if (isRecording) stopRecording();
-  if (previewLoopId) { cancelAnimationFrame(previewLoopId); previewLoopId = null; }
   if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
   document.getElementById('cameraOverlay').classList.remove('active');
+  document.getElementById('camera-video').style.filter = 'none';
 }
-function switchCamera() { facingMode = facingMode === 'environment' ? 'user' : 'environment'; openCamera(); }
 
-function checkTorchSupport() {
-  const track = cameraStream.getVideoTracks()[0];
-  const caps = track && track.getCapabilities ? track.getCapabilities() : {};
-  torchSupported = !!caps.torch;
-  const btn = document.getElementById('flashBtn');
-  torchOn = false;
-  if (torchSupported) { btn.style.display = 'inline-block'; btn.textContent = '⚡ Off'; btn.classList.remove('on'); }
-  else btn.style.display = 'none';
-}
-async function toggleFlash() {
-  if (!torchSupported || !cameraStream) return;
-  torchOn = !torchOn;
-  const track = cameraStream.getVideoTracks()[0];
-  try {
-    await track.applyConstraints({ advanced: [{ torch: torchOn }] });
-    const btn = document.getElementById('flashBtn');
-    btn.textContent = torchOn ? '⚡ On' : '⚡ Off';
-    btn.classList.toggle('on', torchOn);
-  } catch (e) { showToast('❌ Flash not supported'); torchOn = false; }
+function switchCamera() {
+  facingMode = facingMode === 'environment' ? 'user' : 'environment';
+  openCamera();
 }
 
 function setCameraMode(mode) {
@@ -905,22 +943,51 @@ function setCameraMode(mode) {
   document.getElementById('modePhotoBtn').classList.toggle('active', mode === 'photo');
   document.getElementById('modeVideoBtn').classList.toggle('active', mode === 'video');
 }
-function handleShutter() {
-  if (cameraMode === 'photo') takePhoto();
-  else { if (!isRecording) startVideoRecording(); else stopRecording(); }
-}
+
 function updateZoom(val) {
   cameraZoom = parseFloat(val);
   document.getElementById('zoomLabel').textContent = cameraZoom.toFixed(1) + 'x';
+  const video = document.getElementById('camera-video');
+  video.style.transform = `scale(${cameraZoom})`;
+  video.style.transformOrigin = 'center center';
+}
+
+function handleShutter() {
+  if (cameraMode === 'photo') takePhoto();
+  else {
+    if (!isRecording) startVideoRecording();
+    else stopRecording();
+  }
+}
+
+function takePhoto() {
+  const flash = document.getElementById('cameraFlash');
+  flash.classList.add('active'); setTimeout(() => flash.classList.remove('active'), 150);
+
+  const video = document.getElementById('camera-video');
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const w = video.videoWidth || 1080;
+  const h = video.videoHeight || 1920;
+  canvas.width = w; canvas.height = h;
+  
+  // Draw with current filter applied via CSS (canvas doesn't get CSS filters)
+  // Apply filter manually via canvas for true Instagram-style
+  ctx.filter = FILTERS.find(f => f.id === currentFilter)?.css || 'none';
+  ctx.drawImage(video, 0, 0, w, h);
+  ctx.filter = 'none';
+  
+  canvas.toBlob(async (blob) => {
+    if (!blob) { showToast('❌ Failed to save'); return; }
+    const fileName = `IMG_${Date.now()}.jpg`;
+    const file = new File([blob], fileName, { type: 'image/jpeg' });
+    await saveMediaBlob(file, fileName, 'photo');
+  }, 'image/jpeg', 0.95);
 }
 
 function startVideoRecording() {
   const video = document.getElementById('camera-video');
-  const canvas = document.getElementById('recordCanvas');
-  const w = video.videoWidth || 1280, h = video.videoHeight || 720;
-  canvas.width = w; canvas.height = h;
-  const ctx = canvas.getContext('2d');
-
+  const stream = video.captureStream ? video.captureStream(30) : cameraStream;
   isRecording = true; recordedChunks = []; recordSeconds = 0;
   document.getElementById('recTimer').classList.add('active');
   document.getElementById('recTimeText').textContent = '00:00';
@@ -932,25 +999,21 @@ function startVideoRecording() {
   }, 1000);
   document.getElementById('shutterBtn').classList.add('recording');
 
-  function drawFrame() {
-    if (!isRecording) return;
-    renderFilteredFrame(ctx, video, w, h, cameraZoom, facingMode, currentFilter);
-    drawLoopId = requestAnimationFrame(drawFrame);
-  }
-  drawFrame();
-
-  const canvasStream = canvas.captureStream(30);
-  const audioTracks = cameraStream.getAudioTracks();
-  if (audioTracks.length) canvasStream.addTrack(audioTracks[0]);
-
   const mimeCandidates = ['video/mp4;codecs=h264', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
   const mimeType = mimeCandidates.find(m => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) || 'video/webm';
   const ext = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
 
-  mediaRecorder = new MediaRecorder(canvasStream, { mimeType });
+  // Use the camera's audio track if available
+  const audioTracks = cameraStream.getAudioTracks();
+  if (audioTracks.length) {
+    const combinedStream = new MediaStream([...stream.getVideoTracks(), ...audioTracks]);
+    mediaRecorder = new MediaRecorder(combinedStream, { mimeType });
+  } else {
+    mediaRecorder = new MediaRecorder(stream, { mimeType });
+  }
+  
   mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
   mediaRecorder.onstop = async () => {
-    cancelAnimationFrame(drawLoopId);
     const blob = new Blob(recordedChunks, { type: mimeType });
     const fileName = `VID_${Date.now()}.${ext}`;
     const file = new File([blob], fileName, { type: mimeType });
@@ -959,6 +1022,7 @@ function startVideoRecording() {
   mediaRecorder.start();
   showToast('🔴 Recording...');
 }
+
 function stopRecording() {
   isRecording = false;
   clearInterval(recordTimerInterval);
@@ -967,13 +1031,10 @@ function stopRecording() {
   if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
 }
 
-// Web Share (files) opens the native "Save to Photos" sheet on Android/iOS —
-// closest thing a website can do to "save straight into DCIM/Gallery".
 async function saveMediaBlob(file, fileName, mediaType) {
   showLoading(mediaType === 'video' ? '🎥 Saving video...' : '📸 Saving photo...');
   await saveFiles([file], 'camera');
   await refreshData();
-  document.getElementById('cameraOverlay').classList.add('active'); // stay in camera after save
   hideLoading();
   try {
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -982,8 +1043,7 @@ async function saveMediaBlob(file, fileName, mediaType) {
       return;
     }
   } catch (shareErr) {
-    showToast('✅ Saved in app library');
-    return;
+    // fall through
   }
   const link = document.createElement('a');
   link.href = URL.createObjectURL(file);
@@ -991,27 +1051,7 @@ async function saveMediaBlob(file, fileName, mediaType) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  showToast('✅ Saved to app + Downloads!');
-}
-
-function takePhoto() {
-  const flash = document.getElementById('cameraFlash');
-  flash.classList.add('active'); setTimeout(() => flash.classList.remove('active'), 200);
-
-  const video = document.getElementById('camera-video');
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  const w = video.videoWidth || 1280, h = video.videoHeight || 720;
-  canvas.width = w; canvas.height = h;
-
-  renderFilteredFrame(ctx, video, w, h, cameraZoom, facingMode, currentFilter);
-
-  canvas.toBlob(async (blob) => {
-    if (!blob) { showToast('❌ Failed to save'); return; }
-    const fileName = `IMG_${Date.now()}.jpg`;
-    const file = new File([blob], fileName, { type: 'image/jpeg' });
-    await saveMediaBlob(file, fileName, 'photo');
-  }, 'image/jpeg', 0.95);
+  showToast('✅ Saved!');
 }
 
 // ================================================================
@@ -1035,8 +1075,8 @@ document.addEventListener('keydown', (e) => {
     if (document.getElementById('playerOverlay').classList.contains('active')) closePlayer();
     if (document.getElementById('cameraOverlay').classList.contains('active')) closeCamera();
   }
-  if (e.key === ' ') {
-    if (document.getElementById('playerOverlay').classList.contains('active')) { e.preventDefault(); togglePlay(); }
+  if (e.key === ' ' && document.getElementById('playerOverlay').classList.contains('active')) {
+    e.preventDefault(); togglePlay();
   }
 });
 
