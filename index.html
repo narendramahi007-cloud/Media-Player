@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mahi-Media_Pro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+    html, body { width: 100%; height: 100%; }
+    body {
+      background: #f2f2f7;
+      min-height: 100vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    /* ===== Watermark on home screen only ===== */
+    .watermark {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .watermark span {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: rgba(0,0,0,0.05);
+      transform: rotate(-28deg);
+      white-space: nowrap;
+      letter-spacing: 2px;
+    }
+
+    .container {
+      width: 100%;
+      min-height: 100vh;
+      padding: 14px 12px 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .app-header { text-align: center; margin-bottom: 10px; }
+    .app-header h1 {
+      color: #d81b60;
+      font-size: 1.55rem;
+      text-shadow: 0 1px 3px rgba(255,255,255,0.6);
+    }
+
+    .scan-btn-wrap { display: flex; justify-content: center; margin: 8px 0 12px; }
+    .scan-main-btn {
+      background: #d81b60;
+      color: white;
+      border: none;
+      padding: 9px 26px;
+      border-radius: 22px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      box-shadow: 0 3px 10px rgba(216,27,96,0.4);
+      cursor: pointer;
+    }
+    .scan-main-btn:active { transform: scale(0.95); }
+
+    .status {
+      text-align: center;
+      padding: 6px;
+      background: rgba(255,255,255,0.55);
+      border-radius: 10px;
+      margin: 0 0 14px;
+      font-weight: 600;
+      font-size: 0.78rem;
+      color: #333;
+    }
+
+    .hidden-input { display: none; }
+
+    /* ===== 5 category tiles ===== */
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+      gap: 12px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .tile {
+      aspect-ratio: 1 / 1;
+      background: rgba(255,255,255,0.6);
+      border: 1.5px solid rgba(255,255,255,0.8);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: 0.12s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      padding: 4px;
+    }
+    .tile:active { transform: scale(0.94); background: #d81b60; }
+    .tile:active .tile-name, .tile:active .tile-count { color: white; }
+    .tile .tile-icon { font-size: 1.8rem; }
+    .tile .tile-name { font-weight: 600; font-size: 0.7rem; color: #333; text-align: center; }
+    .tile .tile-count { font-size: 0.55rem; color: #666; }
+    .tile-video { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(216,27,96,0.08)); }
+    .tile-music { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(46,125,50,0.08)); }
+    .tile-images { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(106,27,154,0.08)); }
+    .tile-pdf { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(21,101,192,0.08)); }
+    .tile-camera { background: linear-gradient(145deg, rgba(255,255,255,0.6), rgba(0,0,0,0.04)); }
+
+    /* ===== Folder + File list ===== */
+    .file-list-view { display: none; }
+    .back-btn {
+      background: #d81b60;
+      color: white;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 10px;
+      font-size: 0.78rem;
+    }
+    .back-btn:active { transform: scale(0.95); }
+    .list-title { text-align:center; font-weight:700; color:#d81b60; margin-bottom: 8px; font-size: 0.95rem; }
+
+    .folder-list, .file-list { max-height: calc(100vh - 180px); overflow-y: auto; }
+    .folder-item {
+      background: rgba(255,255,255,0.7);
+      padding: 10px 12px;
+      margin: 4px 0;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    .folder-item:active { background: #d81b60; color: white; }
+    .file-item {
+      background: rgba(255,255,255,0.5);
+      padding: 8px 12px;
+      margin: 3px 0;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.82rem;
+    }
+    .file-item:active { background: #d81b60; color: white; }
+    .file-item .ficon { font-size: 1.2rem; }
+    .file-item .fname { flex: 1; word-break: break-word; }
+
+    /* ===== Scan modal ===== */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-sheet {
+      background: white;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px 20px 0 0;
+      padding: 18px 16px 26px;
+    }
+    .modal-sheet h3 { text-align: center; color: #d81b60; margin-bottom: 14px; font-size: 1rem; }
+    .modal-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #fdf0f4;
+      margin-bottom: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: #333;
+    }
+    .modal-option:active { background: #d81b60; color: white; }
+    .modal-option .opt-icon { font-size: 1.3rem; }
+    .modal-cancel {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      margin-top: 6px;
+      background: none;
+      border: none;
+      color: #888;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* ===== Player ===== */
+    .player-overlay {
+      position: fixed; inset: 0;
+      background: #000;
+      z-index: 999;
+      display: none;
+      flex-direction: column;
+    }
+    .player-overlay.active { display: flex; }
+    .player-top {
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      z-index: 20;
+    }
+    .player-top button {
+      background: rgba(255,255,255,0.15);
+      border: none;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .player-content {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #000;
+    }
+    .player-content video, .player-content img { max-width: 100%; max-height: 100%; }
+    #imagePlayer { width: 100%; height: 100%; object-fit: contain; }
+    .player-content iframe { width: 100%; height: 100%; border: none; background: #333; }
+
+    .side-slider {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 15;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(6px);
+      border-radius: 25px;
+      padding: 10px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .side-slider.left { left: 8px; }
+    .side-slider.right { right: 8px; }
+    .side-slider .s-icon { color: white; font-size: 0.85rem; }
+    .side-slider-wrap { width: 30px; height: 90px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .side-slider input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 80px; height: 4px;
+      background: rgba(255,255,255,0.35);
+      border-radius: 2px; outline: none;
+      transform: rotate(-90deg); transform-origin: center;
+    }
+    .side-slider input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 15px; height: 15px; border-radius: 50%;
+      background: #d81b60; cursor: pointer;
+    }
+
+    .player-controls {
+      padding: 10px;
+      background: rgba(0,0,0,0.85);
+      color: white;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+    .player-controls button { background: none; border: none; color: white; font-size: 1.35rem; }
+    .player-controls .play-btn { font-size: 2rem; color: #d81b60; }
+
+    /* ===== CAMERA - Instagram style ===== */
+    .camera-overlay {
+      position: fixed; inset: 0;
+      background: #000;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+    }
+    .camera-overlay.active { display: flex; }
+    #camera-video {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+    #previewCanvas { display: none; }
+
+    .cam-zoom-control {
+      position: absolute; right: 12px; top: 45%;
+      transform: translateY(-50%); z-index: 15;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(8px);
+      border-radius: 30px;
+      padding: 12px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .cam-zoom-control .z-label { color: white; font-size: 0.6rem; font-weight: 700; }
+    .cam-zoom-control .zoom-slider-wrap { width: 30px; height: 100px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .cam-zoom-control input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 80px; height: 3px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 2px; outline: none;
+      transform: rotate(-90deg); transform-origin: center;
+    }
+    .cam-zoom-control input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #fff; cursor: pointer;
+      border: 2px solid #d81b60;
+    }
+
+    .camera-controls {
+      position: absolute; bottom: 30px; left: 0; width: 100%;
+      padding: 0 20px; display: flex; justify-content: space-around; align-items: center; z-index: 10;
+    }
+    .cam-shutter {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: white; border: 4px solid rgba(255,255,255,0.3);
+      cursor: pointer; transition: 0.1s; box-shadow: 0 0 30px rgba(0,0,0,0.4);
+    }
+    .cam-shutter:active { transform: scale(0.85); }
+    .cam-shutter.recording { background: #e74c3c; border-radius: 12px; width: 40px; height: 40px; margin: 14px; border-color: #e74c3c; }
+    .cam-btn {
+      background: rgba(255,255,255,0.15);
+      border: none; color: white;
+      padding: 6px 14px; border-radius: 25px;
+      font-size: 0.8rem; font-weight: 600;
+      backdrop-filter: blur(8px);
+      min-width: 50px;
+    }
+    .cam-btn:active { transform: scale(0.9); }
+
+    .mode-toggle-row {
+      position: absolute; bottom: 116px; left: 0; width: 100%;
+      display: flex; justify-content: center; gap: 10px; z-index: 10;
+    }
+    .mode-btn {
+      background: rgba(0,0,0,0.35); backdrop-filter: blur(8px); border: none;
+      color: rgba(255,255,255,0.6); padding: 5px 22px; border-radius: 20px;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;
+    }
+    .mode-btn.active { color: #fff; background: rgba(255,255,255,0.2); }
+
+    .rec-timer {
+      position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+      color: white; padding: 4px 14px; border-radius: 20px;
+      font-size: 0.8rem; font-weight: 600; display: none; align-items: center; gap: 6px; z-index: 15;
+    }
+    .rec-timer.active { display: flex; }
+    .rec-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff3b30; animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0.2; } }
+
+    /* filter row - instagram style */
+    .filter-row {
+      position: absolute; bottom: 180px; left: 0; width: 100%;
+      padding: 6px 12px; display: flex; gap: 6px; overflow-x: auto; z-index: 10;
+      background: linear-gradient(to top, rgba(0,0,0,0.2), transparent);
+      backdrop-filter: blur(4px);
+      padding-top: 20px;
+    }
+    .filter-row::-webkit-scrollbar { display: none; }
+    .filter-item {
+      flex: 0 0 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 4px 2px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .filter-item:active { transform: scale(0.9); }
+    .filter-item.active { background: rgba(255,255,255,0.15); border-radius: 12px; }
+    .filter-preview {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: #333;
+      object-fit: cover;
+    }
+    .filter-item.active .filter-preview { border-color: #fff; box-shadow: 0 0 16px rgba(255,255,255,0.2); }
+    .filter-name { font-size: 0.5rem; color: white; font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.6); white-space: nowrap; }
+    .filter-item.active .filter-name { color: #fff; }
+
+    /* photo preview flash */
+    .camera-flash {
+      position: absolute; inset: 0; background: white; opacity: 0;
+      pointer-events: none; z-index: 8; transition: opacity 0.08s;
+    }
+    .camera-flash.active { opacity: 0.7; }
+
+    .toast-msg {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.75); color: white; padding: 6px 18px; border-radius: 20px;
+      font-size: 0.75rem; opacity: 0; transition: 0.3s; z-index: 9999; pointer-events: none;
+    }
+    .toast-msg.show { opacity: 1; }
+
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99999;
+      display: none; justify-content: center; align-items: center; flex-direction: column;
+    }
+    .loading-overlay.active { display: flex; }
+    .spinner { width: 32px; height: 32px; border: 3px solid #f3f3f3; border-top: 3px solid #d81b60; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .loading-text { color: white; margin-top: 8px; font-size: 0.8rem; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="watermark" id="homeWatermark"><span>my-photos.jpg &nbsp; my-photos.jpg</span></div>
+
+<div class="container" id="app">
+  <div class="app-header"><h1>📱 Mahi-Media Pro</h1></div>
+
+  <div class="scan-btn-wrap"><button class="scan-main-btn" onclick="openScanModal()">🔍 Scan</button></div>
+  <div class="status" id="status">📂 0 files total</div>
+
+  <input type="file" id="folderInput" class="hidden-input" webkitdirectory multiple onchange="handleFolderSelect(event)">
+  <input type="file" id="fileInput" class="hidden-input" multiple accept="video/*,audio/*,image/*,.pdf" onchange="handleFileSelect(event)">
+
+  <div id="homeView">
+    <div class="tile-grid">
+      <div class="tile tile-video" onclick="openCategory('video')">
+        <span class="tile-icon">🎬</span>
+        <span class="tile-name">Video</span>
+        <span class="tile-count" id="countVideo">0</span>
+      </div>
+      <div class="tile tile-music" onclick="openCategory('audio')">
+        <span class="tile-icon">🎵</span>
+        <span class="tile-name">Music</span>
+        <span class="tile-count" id="countAudio">0</span>
+      </div>
+      <div class="tile tile-images" onclick="openCategory('image')">
+        <span class="tile-icon">🖼️</span>
+        <span class="tile-name">Images</span>
+        <span class="tile-count" id="countImage">0</span>
+      </div>
+      <div class="tile tile-pdf" onclick="openCategory('pdf')">
+        <span class="tile-icon">📄</span>
+        <span class="tile-name">PDF</span>
+        <span class="tile-count" id="countPdf">0</span>
+      </div>
+      <div class="tile tile-camera" onclick="openCamera()">
+        <span class="tile-icon">📷</span>
+        <span class="tile-name">Camera</span>
+        <span class="tile-count">✨ Pro</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="fileView" class="file-list-view">
+    <button class="back-btn" onclick="showHome()">⬅ Back</button>
+    <div class="list-title" id="listTitle">📂 Folders</div>
+    <div id="folderContainer"></div>
+    <div id="fileContainer" style="display:none;">
+      <button class="back-btn" style="margin-bottom:6px;" onclick="showFolders()">📁 Back to Folders</button>
+      <div class="list-title" id="subListTitle">Files</div>
+      <div class="file-list" id="fileList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Scan Modal -->
+<div class="modal-overlay" id="scanModal">
+  <div class="modal-sheet">
+    <h3>📂 Scan Type</h3>
+    <div class="modal-option" onclick="closeScanModal();selectFiles()"><span class="opt-icon">📄</span> Files (multiple)</div>
+    <div class="modal-option" onclick="closeScanModal();selectFolder()"><span class="opt-icon">📁</span> Folder (full scan)</div>
+    <button class="modal-cancel" onclick="closeScanModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- Player -->
+<div class="player-overlay" id="playerOverlay">
+  <div class="player-top">
+    <span id="playerTitle" style="flex:1;font-weight:600;font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">File</span>
+    <button onclick="toggleFullscreenPlayer()">⛶</button>
+    <button onclick="closePlayer()" style="margin-left:6px;">✖</button>
+  </div>
+  <div class="player-content" id="playerContent">
+    <video id="videoPlayer" playsinline></video>
+    <img id="imagePlayer" src="">
+    <iframe id="pdfPlayer"></iframe>
+    <div id="audioPlayer" class="audio-wrap" style="display:none;color:white;text-align:center;padding:20px;">
+      <div style="font-size:3rem;">🎵</div>
+      <div style="margin-top:8px;font-size:0.85rem;font-weight:600;" id="audioName"></div>
+      <audio id="audioElem" controls style="width:90%;max-width:300px;margin-top:12px;"></audio>
+    </div>
+    <div class="side-slider left" id="brightnessControl" style="display:none;">
+      <span class="s-icon">☀️</span>
+      <div class="side-slider-wrap"><input type="range" id="brightnessSlider" min="0.4" max="1.8" step="0.05" value="1" oninput="updateBrightness(this.value)"></div>
+    </div>
+    <div class="side-slider right" id="volumeControl" style="display:none;">
+      <span class="s-icon">🔊</span>
+      <div class="side-slider-wrap"><input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" oninput="updateVolume(this.value)"></div>
+    </div>
+  </div>
+  <div class="player-controls">
+    <button onclick="prevFile()">⏮</button>
+    <button class="play-btn" id="playBtn" onclick="togglePlay()">⏸</button>
+    <button onclick="nextFile()">⏭</button>
+  </div>
+</div>
+
+<!-- Camera (Instagram style) -->
+<div class="camera-overlay" id="cameraOverlay">
+  <video id="camera-video" autoplay playsinline muted></video>
+  <div class="camera-flash" id="cameraFlash"></div>
+
+  <div class="rec-timer" id="recTimer"><span class="rec-dot"></span><span id="recTimeText">00:00</span></div>
+
+  <div class="cam-zoom-control">
+    <span class="z-label" id="zoomLabel">1.0x</span>
+    <div class="zoom-slider-wrap"><input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1" oninput="updateZoom(this.value)"></div>
+  </div>
+
+  <div class="mode-toggle-row">
+    <button class="mode-btn active" id="modePhotoBtn" onclick="setCameraMode('photo')">📸 PHOTO</button>
+    <button class="mode-btn" id="modeVideoBtn" onclick="setCameraMode('video')">🎥 VIDEO</button>
+  </div>
+
+  <div class="filter-row" id="filterRow"></div>
+
+  <div class="camera-controls">
+    <button class="cam-btn" onclick="closeCamera()">✖</button>
+    <div class="cam-shutter" id="shutterBtn" onclick="handleShutter()"></div>
+    <button class="cam-btn" onclick="switchCamera()">🔄</button>
+  </div>
+</div>
+
+<div class="toast-msg" id="toastMsg"></div>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Loading...</div>
+</div>
+
+<script>
+// ================================================================
+// DATABASE
+// ================================================================
+const DB_NAME = "MahiMediaDB";
+let db = null;
+function initDB() {
+  return new Promise((resolve) => {
+    const req = indexedDB.open(DB_NAME, 2);
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains("media")) {
+        const store = d.createObjectStore("media", { keyPath: "id", autoIncrement: true });
+        store.createIndex("folder", "folder", { unique: false });
+        store.createIndex("type", "type", { unique: false });
+      }
+    };
+    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+  });
+}
+function saveFiles(files, source) {
+  return new Promise((resolve) => {
+    const tx = db.transaction("media", "readwrite");
+    const store = tx.objectStore("media");
+    files.forEach(f => {
+      const ext = f.name.split('.').pop().toLowerCase();
+      let type = 'unknown';
+      if (f.type.startsWith('video/') || ['mp4','mkv','webm','avi','mov','3gp'].includes(ext)) type = 'video';
+      else if (f.type.startsWith('image/') || ['jpg','jpeg','png','gif','webp','bmp'].includes(ext)) type = 'image';
+      else if (f.type.startsWith('audio/') || ['mp3','wav','m4a','aac','ogg'].includes(ext)) type = 'audio';
+      else if (f.type === 'application/pdf' || ext === 'pdf') type = 'pdf';
+      if (type !== 'unknown') {
+        let folder = 'Main';
+        if (source === 'folder' && f.webkitRelativePath) {
+          const parts = f.webkitRelativePath.split('/');
+          if (parts.length > 1) folder = parts[parts.length - 2];
+        } else if (source === 'camera') folder = '📸 Camera';
+        else folder = '📁 Selected';
+        store.add({ name: f.name, type: type, folder: folder, blob: f });
+      }
+    });
+    tx.oncomplete = () => resolve();
+  });
+}
+function loadAllFiles() {
+  return new Promise((resolve) => {
+    const tx = db.transaction("media", "readonly");
+    const req = tx.objectStore("media").getAll();
+    req.onsuccess = () => resolve(req.result || []);
+  });
+}
+function deleteFile(id) {
+  return new Promise((resolve) => {
+    const tx = db.transaction("media", "readwrite");
+    tx.objectStore("media").delete(id);
+    tx.oncomplete = () => resolve();
+  });
+}
+
+// ================================================================
+// APP STATE
+// ================================================================
+let allFiles = [];
+let currentPlaylist = [];
+let currentIndex = 0;
+let currentPlayer = null;
+let currentCategory = '';
+let currentFolder = '';
+
+// ================================================================
+// SCAN
+// ================================================================
+function openScanModal() { document.getElementById('scanModal').classList.add('active'); }
+function closeScanModal() { document.getElementById('scanModal').classList.remove('active'); }
+function selectFolder() { document.getElementById('folderInput').click(); }
+function selectFiles() { document.getElementById('fileInput').click(); }
+
+async function handleFolderSelect(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  showLoading('📁 Scanning...');
+  await saveFiles(files, 'folder');
+  await refreshData();
+  hideLoading();
+  showToast(`✅ ${files.length} files scanned!`);
+  e.target.value = '';
+}
+async function handleFileSelect(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  showLoading('📄 Scanning...');
+  await saveFiles(files, 'files');
+  await refreshData();
+  hideLoading();
+  showToast(`✅ ${files.length} files scanned!`);
+  e.target.value = '';
+}
+
+// ================================================================
+// UI — HOME + CATEGORY + FOLDERS
+// ================================================================
+async function refreshData() {
+  allFiles = await loadAllFiles();
+  document.getElementById('status').innerHTML = `📂 ${allFiles.length} files total`;
+  const counts = { video:0, audio:0, image:0, pdf:0 };
+  allFiles.forEach(f => { if (counts[f.type] !== undefined) counts[f.type]++; });
+  document.getElementById('countVideo').textContent = counts.video;
+  document.getElementById('countAudio').textContent = counts.audio;
+  document.getElementById('countImage').textContent = counts.image;
+  document.getElementById('countPdf').textContent = counts.pdf;
+  showHome();
+}
+
+function showHome() {
+  document.getElementById('homeView').style.display = 'block';
+  document.getElementById('fileView').style.display = 'none';
+  document.getElementById('homeWatermark').style.display = 'flex';
+  document.getElementById('fileContainer').style.display = 'none';
+  document.getElementById('folderContainer').style.display = 'block';
+}
+
+function showFolders() {
+  document.getElementById('fileContainer').style.display = 'none';
+  document.getElementById('folderContainer').style.display = 'block';
+  document.getElementById('listTitle').textContent = `📂 ${currentCategory.toUpperCase()} Folders`;
+}
+
+const catMeta = {
+  video: { icon:'🎬', label:'Video' },
+  audio: { icon:'🎵', label:'Music' },
+  image: { icon:'🖼️', label:'Images' },
+  pdf: { icon:'📄', label:'PDF' }
+};
+
+function openCategory(type) {
+  currentCategory = type;
+  const filtered = allFiles.filter(f => f.type === type);
+  const folders = [...new Set(filtered.map(f => f.folder))].sort();
+  
+  document.getElementById('homeView').style.display = 'none';
+  document.getElementById('fileView').style.display = 'block';
+  document.getElementById('homeWatermark').style.display = 'none';
+  document.getElementById('folderContainer').style.display = 'block';
+  document.getElementById('fileContainer').style.display = 'none';
+  
+  document.getElementById('listTitle').textContent = `📂 ${catMeta[type].icon} ${catMeta[type].label} (${filtered.length})`;
+  
+  const container = document.getElementById('folderContainer');
+  container.innerHTML = '';
+  
+  if (!folders.length) {
+    container.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No folders found. Scan some files first.</p>';
+    return;
+  }
+  
+  folders.forEach(folder => {
+    const count = filtered.filter(f => f.folder === folder).length;
+    const div = document.createElement('div');
+    div.className = 'folder-item';
+    div.innerHTML = `📁 ${folder} <span style="margin-left:auto;font-weight:400;font-size:0.7rem;color:#888;">${count}</span>`;
+    div.onclick = () => openFolder(type, folder);
+    container.appendChild(div);
+  });
+}
+
+function openFolder(type, folder) {
+  currentFolder = folder;
+  const files = allFiles.filter(f => f.type === type && f.folder === folder);
+  currentPlaylist = files;
+  
+  document.getElementById('folderContainer').style.display = 'none';
+  document.getElementById('fileContainer').style.display = 'block';
+  document.getElementById('subListTitle').textContent = `📁 ${folder} (${files.length})`;
+  
+  const list = document.getElementById('fileList');
+  list.innerHTML = '';
+  if (!files.length) {
+    list.innerHTML = '<p style="text-align:center;color:#888;padding:20px;">No files</p>';
+    return;
+  }
+  files.forEach(item => {
+    const globalIdx = allFiles.indexOf(item);
+    const div = document.createElement('div');
+    div.className = 'file-item';
+    div.innerHTML = `<span class="ficon">${catMeta[type].icon}</span><span class="fname">${item.name}</span>`;
+    div.onclick = () => playFile(globalIdx);
+    list.appendChild(div);
+  });
+}
+
+// ================================================================
+// PLAYER
+// ================================================================
+function playFile(index) {
+  currentIndex = index;
+  const item = allFiles[index];
+  if (!item) return;
+  const overlay = document.getElementById('playerOverlay');
+  document.getElementById('playerTitle').textContent = item.name;
+  const video = document.getElementById('videoPlayer');
+  const image = document.getElementById('imagePlayer');
+  const pdf = document.getElementById('pdfPlayer');
+  const audio = document.getElementById('audioPlayer');
+  const audioElem = document.getElementById('audioElem');
+  const audioName = document.getElementById('audioName');
+  const brightCtrl = document.getElementById('brightnessControl');
+  const volCtrl = document.getElementById('volumeControl');
+  video.style.display = 'none'; image.style.display = 'none'; pdf.style.display = 'none'; audio.style.display = 'none';
+  brightCtrl.style.display = 'none'; volCtrl.style.display = 'none';
+  video.pause(); audioElem.pause();
+  video.style.filter = 'brightness(1)';
+  document.getElementById('brightnessSlider').value = 1;
+  document.getElementById('volumeSlider').value = 1;
+  
+  const url = URL.createObjectURL(item.blob);
+  if (item.type === 'video') {
+    video.style.display = 'block'; video.src = url; video.play(); currentPlayer = video;
+    brightCtrl.style.display = 'flex'; volCtrl.style.display = 'flex';
+    document.getElementById('playBtn').textContent = '⏸';
+  } else if (item.type === 'image') {
+    image.style.display = 'block'; image.src = url; currentPlayer = null;
+  } else if (item.type === 'pdf') {
+    pdf.style.display = 'block'; pdf.src = url; currentPlayer = null;
+  } else if (item.type === 'audio') {
+    audio.style.display = 'block'; audioName.textContent = item.name; audioElem.src = url; audioElem.play(); currentPlayer = audioElem;
+    volCtrl.style.display = 'flex';
+    document.getElementById('playBtn').textContent = '⏸';
+  }
+  overlay.classList.add('active');
+}
+
+function updateBrightness(val) { document.getElementById('videoPlayer').style.filter = `brightness(${val})`; }
+function updateVolume(val) {
+  if (currentPlayer) currentPlayer.volume = parseFloat(val);
+  document.getElementById('volumeControl').querySelector('.s-icon').textContent = parseFloat(val) === 0 ? '🔇' : '🔊';
+}
+
+function closePlayer() {
+  document.getElementById('playerOverlay').classList.remove('active');
+  document.getElementById('videoPlayer').pause(); document.getElementById('videoPlayer').src = '';
+  document.getElementById('imagePlayer').src = '';
+  document.getElementById('pdfPlayer').src = '';
+  document.getElementById('audioElem').pause(); document.getElementById('audioElem').src = '';
+  if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+}
+
+function toggleFullscreenPlayer() {
+  const el = document.getElementById('playerOverlay');
+  try {
+    if (!document.fullscreenElement) {
+      el.requestFullscreen();
+      if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{});
+    } else {
+      document.exitFullscreen();
+    }
+  } catch (e) { showToast('⛶ Fullscreen not supported'); }
+}
+
+function togglePlay() {
+  if (!currentPlayer) return;
+  const btn = document.getElementById('playBtn');
+  if (currentPlayer.paused) { currentPlayer.play(); btn.textContent = '⏸'; }
+  else { currentPlayer.pause(); btn.textContent = '▶'; }
+}
+function nextFile() {
+  const idx = currentPlaylist.indexOf(allFiles[currentIndex]);
+  if (idx < currentPlaylist.length - 1) playFile(allFiles.indexOf(currentPlaylist[idx + 1]));
+}
+function prevFile() {
+  const idx = currentPlaylist.indexOf(allFiles[currentIndex]);
+  if (idx > 0) playFile(allFiles.indexOf(currentPlaylist[idx - 1]));
+}
+document.addEventListener('ended', () => {
+  if (document.getElementById('playerOverlay').classList.contains('active')) nextFile();
+}, true);
+
+// ================================================================
+// CAMERA — Instagram-style: direct video, NO canvas preview
+// ================================================================
+let cameraStream = null;
+let facingMode = 'environment';
+let cameraZoom = 1;
+let cameraMode = 'photo';
+let isRecording = false;
+let mediaRecorder = null;
+let recordedChunks = [];
+let recordTimerInterval = null;
+let recordSeconds = 0;
+
+// Instagram-style filters (real CSS filter applied directly to video)
+const FILTERS = [
+  { id: 'normal', name: 'Normal', css: 'none' },
+  { id: 'clarendon', name: 'Clarendon', css: 'contrast(1.2) saturate(1.35) brightness(1.05)' },
+  { id: 'gingham', name: 'Gingham', css: 'contrast(1.1) saturate(0.85) brightness(1.05) sepia(0.1)' },
+  { id: 'moon', name: 'Moon', css: 'grayscale(0.7) contrast(1.3) brightness(1.1)' },
+  { id: 'lark', name: 'Lark', css: 'contrast(1.15) saturate(1.4) brightness(1.08)' },
+  { id: 'reyes', name: 'Reyes', css: 'contrast(1.2) brightness(1.15) saturate(0.9) sepia(0.08)' },
+  { id: 'juno', name: 'Juno', css: 'contrast(1.3) saturate(1.2) brightness(1.1) hue-rotate(-5deg)' },
+  { id: 'slumber', name: 'Slumber', css: 'contrast(1.1) brightness(1.1) saturate(0.8) hue-rotate(-10deg)' },
+  { id: 'crema', name: 'Crema', css: 'contrast(1.15) brightness(1.2) saturate(0.9) sepia(0.15)' },
+  { id: 'ludwig', name: 'Ludwig', css: 'contrast(1.2) brightness(1.1) saturate(1.1) sepia(0.05)' }
+];
+
+let currentFilter = 'normal';
+
+function initCameraUI() {
+  const row = document.getElementById('filterRow');
+  row.innerHTML = '';
+  FILTERS.forEach(f => {
+    const item = document.createElement('div');
+    item.className = `filter-item ${f.id === currentFilter ? 'active' : ''}`;
+    const preview = document.createElement('div');
+    preview.className = 'filter-preview';
+    // generate gradient preview
+    const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd', '#ff9f43', '#00d2d3', '#f368e0'];
+    const c = colors[(FILTERS.indexOf(f) * 3) % colors.length];
+    preview.style.background = `linear-gradient(135deg, ${c}, ${c}dd)`;
+    const name = document.createElement('span');
+    name.className = 'filter-name';
+    name.textContent = f.name;
+    item.appendChild(preview); item.appendChild(name);
+    item.onclick = () => {
+      currentFilter = f.id;
+      document.querySelectorAll('.filter-item').forEach(c => c.classList.remove('active'));
+      item.classList.add('active');
+      applyFilterToVideo(currentFilter);
+      showToast(`📸 ${f.name}`);
+    };
+    row.appendChild(item);
+  });
+}
+
+function applyFilterToVideo(filterId) {
+  const video = document.getElementById('camera-video');
+  const f = FILTERS.find(f => f.id === filterId) || FILTERS[0];
+  video.style.filter = f.css;
+}
+
+async function openCamera() {
+  document.getElementById('cameraOverlay').classList.add('active');
+  initCameraUI();
+  document.getElementById('zoomSlider').value = 1;
+  document.getElementById('zoomLabel').textContent = '1.0x';
+  cameraZoom = 1;
+  try {
+    if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+    const constraints = {
+      video: { facingMode: facingMode, width: { ideal: 1080 }, height: { ideal: 1920 } },
+      audio: true
+    };
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (audioErr) {
+      constraints.audio = false;
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    }
+    const v = document.getElementById('camera-video');
+    v.srcObject = cameraStream;
+    await v.play();
+    applyFilterToVideo(currentFilter);
+    showToast('📷 Camera ready');
+  } catch (err) {
+    alert('❌ Camera access denied!\nPlease allow camera permission.');
+    closeCamera();
+  }
+}
+
+function closeCamera() {
+  if (isRecording) stopRecording();
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  document.getElementById('cameraOverlay').classList.remove('active');
+  document.getElementById('camera-video').style.filter = 'none';
+}
+
+function switchCamera() {
+  facingMode = facingMode === 'environment' ? 'user' : 'environment';
+  openCamera();
+}
+
+function setCameraMode(mode) {
+  if (isRecording) return;
+  cameraMode = mode;
+  document.getElementById('modePhotoBtn').classList.toggle('active', mode === 'photo');
+  document.getElementById('modeVideoBtn').classList.toggle('active', mode === 'video');
+}
+
+function updateZoom(val) {
+  cameraZoom = parseFloat(val);
+  document.getElementById('zoomLabel').textContent = cameraZoom.toFixed(1) + 'x';
+  const video = document.getElementById('camera-video');
+  video.style.transform = `scale(${cameraZoom})`;
+  video.style.transformOrigin = 'center center';
+}
+
+function handleShutter() {
+  if (cameraMode === 'photo') takePhoto();
+  else {
+    if (!isRecording) startVideoRecording();
+    else stopRecording();
+  }
+}
+
+function takePhoto() {
+  const flash = document.getElementById('cameraFlash');
+  flash.classList.add('active'); setTimeout(() => flash.classList.remove('active'), 150);
+
+  const video = document.getElementById('camera-video');
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const w = video.videoWidth || 1080;
+  const h = video.videoHeight || 1920;
+  canvas.width = w; canvas.height = h;
+  
+  // Draw with current filter applied via CSS (canvas doesn't get CSS filters)
+  // Apply filter manually via canvas for true Instagram-style
+  ctx.filter = FILTERS.find(f => f.id === currentFilter)?.css || 'none';
+  ctx.drawImage(video, 0, 0, w, h);
+  ctx.filter = 'none';
+  
+  canvas.toBlob(async (blob) => {
+    if (!blob) { showToast('❌ Failed to save'); return; }
+    const fileName = `IMG_${Date.now()}.jpg`;
+    const file = new File([blob], fileName, { type: 'image/jpeg' });
+    await saveMediaBlob(file, fileName, 'photo');
+  }, 'image/jpeg', 0.95);
+}
+
+function startVideoRecording() {
+  const video = document.getElementById('camera-video');
+  const stream = video.captureStream ? video.captureStream(30) : cameraStream;
+  isRecording = true; recordedChunks = []; recordSeconds = 0;
+  document.getElementById('recTimer').classList.add('active');
+  document.getElementById('recTimeText').textContent = '00:00';
+  recordTimerInterval = setInterval(() => {
+    recordSeconds++;
+    const m = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+    const s = String(recordSeconds % 60).padStart(2, '0');
+    document.getElementById('recTimeText').textContent = `${m}:${s}`;
+  }, 1000);
+  document.getElementById('shutterBtn').classList.add('recording');
+
+  const mimeCandidates = ['video/mp4;codecs=h264', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+  const mimeType = mimeCandidates.find(m => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) || 'video/webm';
+  const ext = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
+
+  // Use the camera's audio track if available
+  const audioTracks = cameraStream.getAudioTracks();
+  if (audioTracks.length) {
+    const combinedStream = new MediaStream([...stream.getVideoTracks(), ...audioTracks]);
+    mediaRecorder = new MediaRecorder(combinedStream, { mimeType });
+  } else {
+    mediaRecorder = new MediaRecorder(stream, { mimeType });
+  }
+  
+  mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = async () => {
+    const blob = new Blob(recordedChunks, { type: mimeType });
+    const fileName = `VID_${Date.now()}.${ext}`;
+    const file = new File([blob], fileName, { type: mimeType });
+    await saveMediaBlob(file, fileName, 'video');
+  };
+  mediaRecorder.start();
+  showToast('🔴 Recording...');
+}
+
+function stopRecording() {
+  isRecording = false;
+  clearInterval(recordTimerInterval);
+  document.getElementById('recTimer').classList.remove('active');
+  document.getElementById('shutterBtn').classList.remove('recording');
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+}
+
+async function saveMediaBlob(file, fileName, mediaType) {
+  showLoading(mediaType === 'video' ? '🎥 Saving video...' : '📸 Saving photo...');
+  await saveFiles([file], 'camera');
+  await refreshData();
+  hideLoading();
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: fileName });
+      showToast('✅ Saved!');
+      return;
+    }
+  } catch (shareErr) {
+    // fall through
+  }
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(file);
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast('✅ Saved!');
+}
+
+// ================================================================
+// HELPERS
+// ================================================================
+function showToast(msg) {
+  const el = document.getElementById('toastMsg');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+function showLoading(msg) {
+  document.getElementById('loadingText').textContent = msg || 'Loading...';
+  document.getElementById('loadingOverlay').classList.add('active');
+}
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
+
+async function init() { await initDB(); await refreshData(); }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('playerOverlay').classList.contains('active')) closePlayer();
+    if (document.getElementById('cameraOverlay').classList.contains('active')) closeCamera();
+  }
+  if (e.key === ' ' && document.getElementById('playerOverlay').classList.contains('active')) {
+    e.preventDefault(); togglePlay();
+  }
+});
+
+init();
+</script>
+</body>
+</html>
