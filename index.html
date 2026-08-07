@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mahi-Media_Pro</title>
+  <link rel="icon" href="my-photos.jpg" type="image/jpeg">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    html, body { width: 100%; height: 100%; background: #0a0a0a; overflow: hidden; }
+    body {
+      background: #0a0a0a;
+      min-height: 100vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .watermark {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .watermark img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.06;
+      filter: blur(3px);
+    }
+
+    .container {
+      width: 100%;
+      min-height: 100vh;
+      padding: 12px 10px 20px;
+      position: relative;
+      z-index: 1;
+      background: #0a0a0a;
+    }
+
+    .app-header { text-align: center; margin-bottom: 8px; }
+    .app-header h1 {
+      color: #ff2d55;
+      font-size: 1.5rem;
+      text-shadow: 0 0 30px rgba(255,45,85,0.15);
+      letter-spacing: -0.5px;
+    }
+
+    .scan-btn-wrap { display: flex; justify-content: center; margin: 6px 0 10px; }
+    .scan-main-btn {
+      background: #ff2d55;
+      color: white;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      box-shadow: 0 4px 20px rgba(255,45,85,0.25);
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .scan-main-btn:active { transform: scale(0.94); opacity: 0.8; }
+
+    .status {
+      text-align: center;
+      padding: 5px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      margin: 0 0 12px;
+      font-weight: 500;
+      font-size: 0.7rem;
+      color: #666;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .hidden-input { display: none; }
+
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .tile {
+      aspect-ratio: 1 / 1;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+      transition: 0.15s;
+      padding: 4px;
+    }
+    .tile:active { transform: scale(0.92); background: #ff2d55; }
+    .tile:active .tile-name, .tile:active .tile-count { color: white; }
+    .tile .tile-icon { font-size: 1.6rem; }
+    .tile .tile-name { font-weight: 600; font-size: 0.6rem; color: #aaa; text-align: center; }
+    .tile .tile-count { font-size: 0.5rem; color: #555; }
+    .tile-video { background: linear-gradient(145deg, rgba(255,45,85,0.06), rgba(255,45,85,0.01)); }
+    .tile-music { background: linear-gradient(145deg, rgba(52,199,89,0.06), rgba(52,199,89,0.01)); }
+    .tile-images { background: linear-gradient(145deg, rgba(175,82,222,0.06), rgba(175,82,222,0.01)); }
+    .tile-pdf { background: linear-gradient(145deg, rgba(0,122,255,0.06), rgba(0,122,255,0.01)); }
+    .tile-camera { background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); }
+
+    .file-list-view { display: none; }
+    .back-btn {
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
+      font-size: 0.7rem;
+    }
+    .back-btn:active { transform: scale(0.94); background: #ff2d55; }
+
+    .list-title { text-align:center; font-weight:700; color:#fff; margin-bottom: 8px; font-size: 0.85rem; letter-spacing: -0.3px; }
+
+    .folder-item {
+      background: rgba(255,255,255,0.03);
+      padding: 10px 14px;
+      margin: 4px 0;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #ddd;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .folder-item:active { background: #ff2d55; color: white; }
+
+    .file-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 4px 0;
+    }
+    .file-thumb {
+      aspect-ratio: 1/1;
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.04);
+      transition: 0.12s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .file-thumb:active { transform: scale(0.94); border-color: #ff2d55; }
+    .file-thumb img, .file-thumb video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .file-thumb .thumb-icon {
+      font-size: 2.5rem;
+      opacity: 0.4;
+    }
+    .file-thumb .thumb-label {
+      position: absolute;
+      bottom: 2px;
+      left: 2px;
+      right: 2px;
+      font-size: 0.45rem;
+      color: rgba(255,255,255,0.8);
+      background: rgba(0,0,0,0.6);
+      padding: 2px 4px;
+      border-radius: 4px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      backdrop-filter: blur(4px);
+      text-align: center;
+    }
+    .file-thumb .play-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.8rem;
+      text-shadow: 0 0 30px rgba(0,0,0,0.9);
+      opacity: 0.6;
+    }
+    .file-thumb .file-type-badge {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      font-size: 0.6rem;
+      background: rgba(0,0,0,0.5);
+      padding: 1px 6px;
+      border-radius: 8px;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 500;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .modal-overlay.active { display: flex; }
+    .modal-sheet {
+      background: #1a1a1a;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px 20px 0 0;
+      padding: 18px 16px 26px;
+    }
+    .modal-sheet h3 { text-align: center; color: #ff2d55; margin-bottom: 14px; font-size: 1rem; }
+    .modal-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #ddd;
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .modal-option:active { background: #ff2d55; color: white; }
+    .modal-option .opt-icon { font-size: 1.2rem; }
+    .modal-cancel {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      margin-top: 6px;
+      background: none;
+      border: none;
+      color: #666;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* ===== PLAYER ===== */
+    .player-overlay {
+      position: fixed; inset: 0;
+      background: #0a0a0a;
+      z-index: 999;
+      display: none;
+      flex-direction: column;
+    }
+    .player-overlay.active { display: flex; }
+    .player-top {
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      z-index: 20;
+    }
+    .player-top button {
+      background: rgba(255,255,255,0.06);
+      border: none;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+    }
+    .player-content {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #0a0a0a;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+    }
+    #videoPlayer {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    #imagePlayer {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    .video-progress-container {
+      position: absolute;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      z-index: 15;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .video-progress-container.active { display: flex; }
+    .video-progress-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+    .video-progress-fill {
+      height: 100%;
+      background: #ff2d55;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.1s;
+    }
+    .video-time-display {
+      display: flex;
+      justify-content: space-between;
+      color: rgba(255,255,255,0.7);
+      font-size: 0.6rem;
+      font-weight: 600;
+      padding: 0 2px;
+    }
+
+    .music-full {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding: 20px;
+      background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+    }
+    .music-full.active { display: flex; }
+    .music-art {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ff2d55, #ff6b8a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      margin-bottom: 20px;
+      box-shadow: 0 0 60px rgba(255,45,85,0.2);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(255,45,85,0.2); }
+      50% { transform: scale(1.03); box-shadow: 0 0 80px rgba(255,45,85,0.3); }
+    }
+    .music-title { color: white; font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+    .music-artist { color: #888; font-size: 0.8rem; margin-bottom: 16px; }
+    .music-controls {
+      display: flex;
+      gap: 30px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .music-controls button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.8rem;
+      cursor: pointer;
+      padding: 8px;
+      transition: 0.15s;
+    }
+    .music-controls button:active { transform: scale(0.85); }
+    .music-controls .play-btn { font-size: 3.2rem; color: #ff2d55; }
+    .music-progress {
+      width: 80%;
+      max-width: 350px;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      position: relative;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .music-progress-bar {
+      height: 100%;
+      background: #ff2d55;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.1s;
+    }
+
+    .side-slider {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 15;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      border-radius: 25px;
+      padding: 8px 4px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .side-slider.active { display: flex; }
+    .side-slider.left { left: 6px; }
+    .side-slider.right { right: 6px; }
+    .side-slider .s-icon { color: white; font-size: 0.7rem; }
+    .side-slider-wrap { width: 24px; height: 80px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .side-slider input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 70px; height: 3px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px; outline: none;
+      transform: rotate(-90deg); transform-origin: center;
+    }
+    .side-slider input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #ff2d55; cursor: pointer;
+      border: 2px solid white;
+    }
+
+    .player-bottom-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      width: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      padding: 10px;
+      z-index: 20;
+    }
+    .player-bottom-controls.active { display: flex; }
+    .player-bottom-controls button {
+      background: rgba(255,255,255,0.08);
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      padding: 8px 16px;
+      border-radius: 30px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: 0.15s;
+    }
+    .player-bottom-controls button:active { transform: scale(0.85); background: #ff2d55; }
+    .player-bottom-controls .play-btn { font-size: 1.8rem; padding: 8px 22px; background: #ff2d55; }
+
+    /* ===== CAMERA ===== */
+    .camera-overlay {
+      position: fixed; inset: 0;
+      background: #000;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+    }
+    .camera-overlay.active { display: flex; }
+    #camera-video {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+    #beautyCanvas {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      z-index: 5;
+      background: transparent;
+      display: none;
+    }
+    #beautyCanvas.active { display: block; }
+
+    .cam-control-left {
+      position: absolute; left: 12px; top: 50%;
+      transform: translateY(-50%); z-index: 15;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      border-radius: 30px;
+      padding: 12px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .cam-control-left .c-label { color: white; font-size: 0.6rem; font-weight: 700; }
+    .cam-control-left .slider-wrap { width: 30px; height: 100px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .cam-control-left input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 80px; height: 3px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px; outline: none;
+      transform: rotate(-90deg); transform-origin: center;
+    }
+    .cam-control-left input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #fff; cursor: pointer;
+      border: 2px solid #ff2d55;
+    }
+
+    .cam-control-right {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%); z-index: 15;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      border-radius: 30px;
+      padding: 12px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .cam-control-right .c-label { color: white; font-size: 0.6rem; font-weight: 700; }
+    .cam-control-right .slider-wrap { width: 30px; height: 100px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .cam-control-right input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 80px; height: 3px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px; outline: none;
+      transform: rotate(-90deg); transform-origin: center;
+    }
+    .cam-control-right input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #fff; cursor: pointer;
+      border: 2px solid #ff2d55;
+    }
+
+    .camera-controls {
+      position: absolute; bottom: 30px; left: 0; width: 100%;
+      padding: 0 20px; display: flex; justify-content: space-around; align-items: center; z-index: 10;
+    }
+    .cam-shutter {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: white; border: 4px solid rgba(255,255,255,0.15);
+      cursor: pointer; transition: 0.1s; box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    }
+    .cam-shutter:active { transform: scale(0.85); }
+    .cam-shutter.recording { background: #ff3b30; border-radius: 12px; width: 40px; height: 40px; margin: 14px; border-color: #ff3b30; }
+    .cam-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: white;
+      padding: 6px 14px; border-radius: 25px;
+      font-size: 0.75rem; font-weight: 600;
+      backdrop-filter: blur(8px);
+      min-width: 50px;
+    }
+    .cam-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.1); }
+    .cam-close-btn {
+      background: rgba(255,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+    }
+    .cam-close-btn:active { transform: scale(0.9); background: rgba(255,0,0,0.5); }
+
+    .mode-toggle-row {
+      position: absolute; bottom: 116px; left: 0; width: 100%;
+      display: flex; justify-content: center; gap: 10px; z-index: 10;
+    }
+    .mode-btn {
+      background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.4); padding: 5px 22px; border-radius: 20px;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px;
+    }
+    .mode-btn.active { color: #fff; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.12); }
+
+    .rec-timer {
+      position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+      color: white; padding: 4px 14px; border-radius: 20px;
+      font-size: 0.8rem; font-weight: 600; display: none; align-items: center; gap: 6px; z-index: 15;
+    }
+    .rec-timer.active { display: flex; }
+    .rec-dot { width: 8px; height: 8px; border-radius: 50%; background: #ff3b30; animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0.2; } }
+
+    .filter-row {
+      position: absolute; bottom: 180px; left: 0; width: 100%;
+      padding: 6px 12px; display: flex; gap: 6px; overflow-x: auto; z-index: 10;
+      background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+      backdrop-filter: blur(4px);
+      padding-top: 20px;
+    }
+    .filter-row::-webkit-scrollbar { display: none; }
+    .filter-item {
+      flex: 0 0 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 4px 2px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .filter-item:active { transform: scale(0.9); }
+    .filter-item.active { background: rgba(255,255,255,0.06); border-radius: 12px; }
+    .filter-preview {
+      width: 48px; height: 48px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.06);
+      background: #333;
+      object-fit: cover;
+    }
+    .filter-item.active .filter-preview { border-color: #fff; box-shadow: 0 0 20px rgba(255,255,255,0.06); }
+    .filter-name { font-size: 0.5rem; color: rgba(255,255,255,0.6); font-weight: 600; text-shadow: 0 1px 4px rgba(0,0,0,0.6); white-space: nowrap; }
+    .filter-item.active .filter-name { color: #fff; }
+
+    .camera-flash {
+      position: absolute; inset: 0; background: white; opacity: 0;
+      pointer-events: none; z-index: 8; transition: opacity 0.08s;
+    }
+    .camera-flash.active { opacity: 0.5; }
+
+    .toast-msg {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.8); color: white; padding: 6px 18px; border-radius: 20px;
+      font-size: 0.7rem; opacity: 0; transition: 0.3s; z-index: 9999; pointer-events: none;
+      backdrop-filter: blur(8px);
+    }
+    .toast-msg.show { opacity: 1; }
+
+    .loading-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99999;
+      display: none; justify-content: center; align-items: center; flex-direction: column;
+    }
+    .loading-overlay.active { display: flex; }
+    .spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.06); border-top: 3px solid #ff2d55; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .loading-text { color: white; margin-top: 8px; font-size: 0.8rem; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="watermark" id="homeWatermark">
+  <img src="my-photos.jpg" alt="watermark">
+</div>
+
+<div class="container" id="app">
+  <div class="app-header"><h1>📱 Mahi-Media Pro</h1></div>
+
+  <div class="scan-btn-wrap"><button class="scan-main-btn" onclick="openScanModal()">🔍 Scan</button></div>
+  <div class="status" id="status">📂 0 files total</div>
+
+  <input type="file" id="folderInput" class="hidden-input" webkitdirectory multiple onchange="handleFolderSelect(event)">
+  <input type="file" id="fileInput" class="hidden-input" multiple accept="video/*,audio/*,image/*,.pdf" onchange="handleFileSelect(event)">
+
+  <div id="homeView">
+    <div class="tile-grid">
+      <div class="tile tile-video" onclick="openCategory('video')">
+        <span class="tile-icon">🎬</span>
+        <span class="tile-name">Video</span>
+        <span class="tile-count" id="countVideo">0</span>
+      </div>
+      <div class="tile tile-music" onclick="openCategory('audio')">
+        <span class="tile-icon">🎵</span>
+        <span class="tile-name">Music</span>
+        <span class="tile-count" id="countAudio">0</span>
+      </div>
+      <div class="tile tile-images" onclick="openCategory('image')">
+        <span class="tile-icon">🖼️</span>
+        <span class="tile-name">Images</span>
+        <span class="tile-count" id="countImage">0</span>
+      </div>
+      <div class="tile tile-pdf" onclick="openCategory('pdf')">
+        <span class="tile-icon">📄</span>
+        <span class="tile-name">PDF</span>
+        <span class="tile-count" id="countPdf">0</span>
+      </div>
+      <div class="tile tile-camera" onclick="openCamera()">
+        <span class="tile-icon">📷</span>
+        <span class="tile-name">Camera</span>
+        <span class="tile-count">✨ Pro</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="fileView" class="file-list-view">
+    <button class="back-btn" onclick="showHome()">⬅ Back</button>
+    <div class="list-title" id="listTitle">📂 Folders</div>
+    <div id="folderContainer"></div>
+    <div id="fileContainer" style="display:none;">
+      <button class="back-btn" style="margin-bottom:6px;" onclick="showFolders()">📁 Back to Folders</button>
+      <div class="list-title" id="subListTitle">Files</div>
+      <div class="file-grid" id="fileGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Scan Modal -->
+<div class="modal-overlay" id="scanModal">
+  <div class="modal-sheet">
+    <h3>📂 Scan Type</h3>
+    <div class="modal-option" onclick="closeScanModal();selectFiles()"><span class="opt-icon">📄</span> Files (multiple)</div>
+    <div class="modal-option" onclick="closeScanModal();selectFolder()"><span class="opt-icon">📁</span> Folder (full scan)</div>
+    <button class="modal-cancel" onclick="closeScanModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- Player -->
+<div class="player-overlay" id="playerOverlay">
+  <div class="player-top">
+    <span id="playerTitle" style="flex:1;font-weight:600;font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">File</span>
+    <button onclick="toggleFullscreenPlayer()">⛶</button>
+    <button onclick="closePlayer()" style="margin-left:6px;">✖</button>
+  </div>
+  <div class="player-content" id="playerContent">
+    <video id="videoPlayer" playsinline webkit-playsinline style="display:none;"></video>
+    <img id="imagePlayer" src="" style="display:none;" draggable="false">
+    
+    <div class="video-progress-container" id="videoProgressContainer">
+      <div class="video-progress-bar" id="videoProgressBar" onclick="seekVideo(event)">
+        <div class="video-progress-fill" id="videoProgressFill"></div>
+      </div>
+      <div class="video-time-display">
+        <span id="videoCurrentTime">00:00</span>
+        <span id="videoDuration">00:00</span>
+      </div>
+    </div>
+
+    <div class="music-full" id="musicFull">
+      <div class="music-art" id="musicArt">🎵</div>
+      <div class="music-title" id="musicTitle">Song Name</div>
+      <div class="music-artist" id="musicArtist">Artist</div>
+      <div class="music-progress" id="musicProgress" onclick="seekMusic(event)">
+        <div class="music-progress-bar" id="musicProgressBar"></div>
+      </div>
+      <div class="music-controls">
+        <button onclick="prevFile()">⏮</button>
+        <button class="play-btn" id="musicPlayBtn" onclick="togglePlay()">▶</button>
+        <button onclick="nextFile()">⏭</button>
+      </div>
+      <audio id="audioElem" style="display:none;"></audio>
+    </div>
+    
+    <div class="side-slider left" id="brightnessControl">
+      <span class="s-icon">☀️</span>
+      <div class="side-slider-wrap"><input type="range" id="brightnessSlider" min="0.4" max="1.8" step="0.05" value="1" oninput="updateBrightness(this.value)"></div>
+    </div>
+    <div class="side-slider right" id="volumeControl">
+      <span class="s-icon">🔊</span>
+      <div class="side-slider-wrap"><input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" oninput="updateVolume(this.value)"></div>
+    </div>
+  </div>
+  
+  <div class="player-bottom-controls" id="playerBottomControls">
+    <button onclick="prevFile()">⏮</button>
+    <button class="play-btn" id="playBtn" onclick="togglePlay()">⏸</button>
+    <button onclick="nextFile()">⏭</button>
+  </div>
+</div>
+
+<!-- Camera -->
+<div class="camera-overlay" id="cameraOverlay">
+  <video id="camera-video" autoplay playsinline muted></video>
+  <canvas id="beautyCanvas"></canvas>
+  <div class="camera-flash" id="cameraFlash"></div>
+
+  <div class="rec-timer" id="recTimer"><span class="rec-dot"></span><span id="recTimeText">00:00</span></div>
+
+  <div class="cam-control-left">
+    <span class="c-label">☀️</span>
+    <div class="slider-wrap"><input type="range" id="camBrightnessSlider" min="0.3" max="2" step="0.05" value="1" oninput="updateCamBrightness(this.value)"></div>
+  </div>
+  <div class="cam-control-right">
+    <span class="c-label" id="zoomLabel">1.0x</span>
+    <div class="slider-wrap"><input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1" oninput="updateZoom(this.value)"></div>
+  </div>
+
+  <div class="mode-toggle-row">
+    <button class="mode-btn active" id="modePhotoBtn" onclick="setCameraMode('photo')">📸 PHOTO</button>
+    <button class="mode-btn" id="modeVideoBtn" onclick="setCameraMode('video')">🎥 VIDEO</button>
+  </div>
+
+  <div class="filter-row" id="filterRow"></div>
+
+  <div class="camera-controls">
+    <button class="cam-close-btn" onclick="closeCamera()">✖ Close</button>
+    <div class="cam-shutter" id="shutterBtn" onclick="handleShutter()"></div>
+    <button class="cam-btn" onclick="switchCamera()">🔄</button>
+  </div>
+</div>
+
+<div class="toast-msg" id="toastMsg"></div>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Loading...</div>
+</div>
+
+<script>
+// ================================================================
+// DATABASE
+// ================================================================
+const DB_NAME = "MahiMediaDB";
+let db = null;
+function initDB() {
+  return new Promise((resolve) => {
+    const req = indexedDB.open(DB_NAME, 2);
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains("media")) {
+        const store = d.createObjectStore("media", { keyPath: "id", autoIncrement: true });
+        store.createIndex("folder", "folder", { unique: false });
+        store.createIndex("type", "type", { unique: false });
+      }
+    };
+    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+  });
+}
+function saveFiles(files, source) {
+  return new Promise((resolve) => {
+    const tx = db.transaction("media", "readwrite");
+    const store = tx.objectStore("media");
+    files.forEach(f => {
+      const ext = f.name.split('.').pop().toLowerCase();
+      let type = 'unknown';
+      if (f.type.startsWith('video/') || ['mp4','mkv','webm','avi','mov','3gp'].includes(ext)) type = 'video';
+      else if (f.type.startsWith('image/') || ['jpg','jpeg','png','gif','webp','bmp'].includes(ext)) type = 'image';
+      else if (f.type.startsWith('audio/') || ['mp3','wav','m4a','aac','ogg'].includes(ext)) type = 'audio';
+      else if (f.type === 'application/pdf' || ext === 'pdf') type = 'pdf';
+      if (type !== 'unknown') {
+        let folder = 'Main';
+        if (source === 'folder' && f.webkitRelativePath) {
+          const parts = f.webkitRelativePath.split('/');
+          if (parts.length > 1) folder = parts[parts.length - 2];
+        } else if (source === 'camera') folder = '📸 Camera';
+        else folder = '📁 Selected';
+        store.add({ name: f.name, type: type, folder: folder, blob: f });
+      }
+    });
+    tx.oncomplete = () => resolve();
+  });
+}
+function loadAllFiles() {
+  return new Promise((resolve) => {
+    const tx = db.transaction("media", "readonly");
+    const req = tx.objectStore("media").getAll();
+    req.onsuccess = () => resolve(req.result || []);
+  });
+}
+
+// ================================================================
+// APP STATE
+// ================================================================
+let allFiles = [];
+let currentPlaylist = [];
+let currentIndex = 0;
+let currentPlayer = null;
+let currentCategory = '';
+let currentFolder = '';
+let isMusicMode = false;
+let musicProgressInterval = null;
+
+// ================================================================
+// SCAN
+// ================================================================
+function openScanModal() { document.getElementById('scanModal').classList.add('active'); }
+function closeScanModal() { document.getElementById('scanModal').classList.remove('active'); }
+function selectFolder() { document.getElementById('folderInput').click(); }
+function selectFiles() { document.getElementById('fileInput').click(); }
+
+async function handleFolderSelect(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  showLoading('📁 Scanning...');
+  await saveFiles(files, 'folder');
+  await refreshData();
+  hideLoading();
+  showToast(`✅ ${files.length} files scanned!`);
+  e.target.value = '';
+}
+async function handleFileSelect(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  showLoading('📄 Scanning...');
+  await saveFiles(files, 'files');
+  await refreshData();
+  hideLoading();
+  showToast(`✅ ${files.length} files scanned!`);
+  e.target.value = '';
+}
+
+// ================================================================
+// UI — HOME + CATEGORY + FOLDERS
+// ================================================================
+async function refreshData() {
+  allFiles = await loadAllFiles();
+  document.getElementById('status').innerHTML = `📂 ${allFiles.length} files total`;
+  const counts = { video:0, audio:0, image:0, pdf:0 };
+  allFiles.forEach(f => { if (counts[f.type] !== undefined) counts[f.type]++; });
+  document.getElementById('countVideo').textContent = counts.video;
+  document.getElementById('countAudio').textContent = counts.audio;
+  document.getElementById('countImage').textContent = counts.image;
+  document.getElementById('countPdf').textContent = counts.pdf;
+  showHome();
+}
+
+function showHome() {
+  document.getElementById('homeView').style.display = 'block';
+  document.getElementById('fileView').style.display = 'none';
+  document.getElementById('fileContainer').style.display = 'none';
+  document.getElementById('folderContainer').style.display = 'block';
+}
+
+function showFolders() {
+  document.getElementById('fileContainer').style.display = 'none';
+  document.getElementById('folderContainer').style.display = 'block';
+  document.getElementById('listTitle').textContent = `📂 ${currentCategory.toUpperCase()} Folders`;
+}
+
+const catMeta = {
+  video: { icon:'🎬', label:'Video' },
+  audio: { icon:'🎵', label:'Music' },
+  image: { icon:'🖼️', label:'Images' },
+  pdf: { icon:'📄', label:'PDF' }
+};
+
+function openCategory(type) {
+  currentCategory = type;
+  const filtered = allFiles.filter(f => f.type === type);
+  const folders = [...new Set(filtered.map(f => f.folder))].sort();
+  
+  document.getElementById('homeView').style.display = 'none';
+  document.getElementById('fileView').style.display = 'block';
+  document.getElementById('folderContainer').style.display = 'block';
+  document.getElementById('fileContainer').style.display = 'none';
+  
+  document.getElementById('listTitle').textContent = `📂 ${catMeta[type].icon} ${catMeta[type].label} (${filtered.length})`;
+  
+  const container = document.getElementById('folderContainer');
+  container.innerHTML = '';
+  
+  if (!folders.length) {
+    container.innerHTML = '<p style="text-align:center;color:#666;padding:20px;font-size:0.8rem;">No folders found. Scan some files first.</p>';
+    return;
+  }
+  
+  folders.forEach(folder => {
+    const count = filtered.filter(f => f.folder === folder).length;
+    const div = document.createElement('div');
+    div.className = 'folder-item';
+    div.innerHTML = `📁 ${folder} <span style="margin-left:auto;font-weight:400;font-size:0.65rem;color:#666;">${count}</span>`;
+    div.onclick = () => openFolder(type, folder);
+    container.appendChild(div);
+  });
+}
+
+function openFolder(type, folder) {
+  currentFolder = folder;
+  const files = allFiles.filter(f => f.type === type && f.folder === folder);
+  currentPlaylist = files;
+  
+  document.getElementById('folderContainer').style.display = 'none';
+  document.getElementById('fileContainer').style.display = 'block';
+  document.getElementById('subListTitle').textContent = `📁 ${folder} (${files.length})`;
+  
+  const grid = document.getElementById('fileGrid');
+  grid.innerHTML = '';
+  if (!files.length) {
+    grid.innerHTML = '<p style="text-align:center;color:#666;padding:20px;font-size:0.8rem;grid-column:1/-1;">No files</p>';
+    return;
+  }
+  files.forEach(item => {
+    const globalIdx = allFiles.indexOf(item);
+    const thumb = document.createElement('div');
+    thumb.className = 'file-thumb';
+    
+    if (item.type === 'video') {
+      const video = document.createElement('video');
+      video.src = URL.createObjectURL(item.blob);
+      video.muted = true;
+      video.preload = 'metadata';
+      video.onloadeddata = () => { video.currentTime = 0.5; };
+      thumb.appendChild(video);
+      const badge = document.createElement('div');
+      badge.className = 'play-badge';
+      badge.textContent = '▶';
+      thumb.appendChild(badge);
+      const typeBadge = document.createElement('div');
+      typeBadge.className = 'file-type-badge';
+      typeBadge.textContent = '🎬';
+      thumb.appendChild(typeBadge);
+    } else if (item.type === 'image') {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(item.blob);
+      thumb.appendChild(img);
+    } else if (item.type === 'audio') {
+      const icon = document.createElement('div');
+      icon.className = 'thumb-icon';
+      icon.textContent = '🎵';
+      thumb.appendChild(icon);
+      const typeBadge = document.createElement('div');
+      typeBadge.className = 'file-type-badge';
+      typeBadge.textContent = '🎵';
+      thumb.appendChild(typeBadge);
+    } else if (item.type === 'pdf') {
+      const icon = document.createElement('div');
+      icon.className = 'thumb-icon';
+      icon.textContent = '📄';
+      thumb.appendChild(icon);
+      const typeBadge = document.createElement('div');
+      typeBadge.className = 'file-type-badge';
+      typeBadge.textContent = '📄';
+      thumb.appendChild(typeBadge);
+    }
+    
+    const label = document.createElement('div');
+    label.className = 'thumb-label';
+    label.textContent = item.name;
+    thumb.appendChild(label);
+    
+    thumb.onclick = () => playFile(globalIdx);
+    grid.appendChild(thumb);
+  });
+}
+
+// ================================================================
+// PLAYER
+// ================================================================
+function playFile(index) {
+  currentIndex = index;
+  const item = allFiles[index];
+  if (!item) return;
+  
+  const overlay = document.getElementById('playerOverlay');
+  document.getElementById('playerTitle').textContent = item.name;
+  
+  const video = document.getElementById('videoPlayer');
+  const image = document.getElementById('imagePlayer');
+  const musicFull = document.getElementById('musicFull');
+  const audioElem = document.getElementById('audioElem');
+  const bottomControls = document.getElementById('playerBottomControls');
+  const brightCtrl = document.getElementById('brightnessControl');
+  const volCtrl = document.getElementById('volumeControl');
+  const videoProgress = document.getElementById('videoProgressContainer');
+  
+  // Reset all
+  video.style.display = 'none';
+  image.style.display = 'none';
+  musicFull.classList.remove('active');
+  bottomControls.classList.remove('active');
+  brightCtrl.classList.remove('active');
+  volCtrl.classList.remove('active');
+  videoProgress.classList.remove('active');
+  video.pause();
+  audioElem.pause();
+  if (musicProgressInterval) { clearInterval(musicProgressInterval); musicProgressInterval = null; }
+  
+  const url = URL.createObjectURL(item.blob);
+  
+  if (item.type === 'video') {
+    video.style.display = 'block';
+    video.src = url;
+    video.load();
+    video.play();
+    currentPlayer = video;
+    bottomControls.classList.add('active');
+    brightCtrl.classList.add('active');
+    volCtrl.classList.add('active');
+    videoProgress.classList.add('active');
+    document.getElementById('playBtn').textContent = '⏸';
+    isMusicMode = false;
+    
+    video.addEventListener('timeupdate', updateVideoProgress);
+    video.addEventListener('loadedmetadata', () => {
+      document.getElementById('videoDuration').textContent = formatTime(video.duration);
+    });
+    
+  } else if (item.type === 'image') {
+    image.style.display = 'block';
+    image.src = url;
+    currentPlayer = null;
+    bottomControls.classList.add('active');
+    brightCtrl.classList.add('active');
+    isMusicMode = false;
+    image.style.transform = 'scale(1)';
+    image.style.transformOrigin = 'center center';
+    initImageZoom(image);
+    
+  } else if (item.type === 'audio') {
+    musicFull.classList.add('active');
+    document.getElementById('musicTitle').textContent = item.name;
+    document.getElementById('musicArtist').textContent = '🎵 Music';
+    document.getElementById('musicArt').textContent = '🎵';
+    audioElem.src = url;
+    audioElem.load();
+    audioElem.play();
+    currentPlayer = audioElem;
+    volCtrl.classList.add('active');
+    isMusicMode = true;
+    document.getElementById('musicPlayBtn').textContent = '⏸';
+    musicProgressInterval = setInterval(() => {
+      if (audioElem.duration) {
+        const pct = (audioElem.currentTime / audioElem.duration) * 100;
+        document.getElementById('musicProgressBar').style.width = pct + '%';
+      }
+    }, 200);
+    
+  } else if (item.type === 'pdf') {
+    window.open(url, '_blank');
+    showToast('📄 PDF opened in new tab');
+    return;
+  }
+  overlay.classList.add('active');
+}
+
+function updateVideoProgress() {
+  const video = document.getElementById('videoPlayer');
+  if (video.duration) {
+    const pct = (video.currentTime / video.duration) * 100;
+    document.getElementById('videoProgressFill').style.width = pct + '%';
+    document.getElementById('videoCurrentTime').textContent = formatTime(video.currentTime);
+    document.getElementById('videoDuration').textContent = formatTime(video.duration);
+  }
+}
+
+function seekVideo(e) {
+  const video = document.getElementById('videoPlayer');
+  const bar = document.getElementById('videoProgressBar');
+  const rect = bar.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width;
+  if (video.duration) {
+    video.currentTime = x * video.duration;
+  }
+}
+
+function seekMusic(e) {
+  const audio = document.getElementById('audioElem');
+  const bar = document.getElementById('musicProgress');
+  const rect = bar.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width;
+  if (audio.duration) {
+    audio.currentTime = x * audio.duration;
+  }
+}
+
+function formatTime(seconds) {
+  if (!seconds || isNaN(seconds)) return '00:00';
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+// Image Zoom with pinch
+function initImageZoom(img) {
+  let scale = 1;
+  let lastScale = 1;
+  let isPinching = false;
+  
+  img.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      isPinching = true;
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      lastScale = Math.sqrt(dx*dx + dy*dy);
+    }
+  }, { passive: true });
+  
+  img.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const delta = dist / lastScale;
+      scale = Math.min(3, Math.max(0.5, scale * delta));
+      img.style.transform = `scale(${scale})`;
+      lastScale = dist;
+    }
+  }, { passive: false });
+  
+  img.addEventListener('touchend', function(e) {
+    isPinching = false;
+  }, { passive: true });
+}
+
+function togglePlay() {
+  if (!currentPlayer) return;
+  if (isMusicMode) {
+    const btn = document.getElementById('musicPlayBtn');
+    if (currentPlayer.paused) { currentPlayer.play(); btn.textContent = '⏸'; }
+    else { currentPlayer.pause(); btn.textContent = '▶'; }
+  } else {
+    const btn = document.getElementById('playBtn');
+    if (currentPlayer.paused) { currentPlayer.play(); btn.textContent = '⏸'; }
+    else { currentPlayer.pause(); btn.textContent = '▶'; }
+  }
+}
+
+function updateVolume(val) {
+  if (currentPlayer) currentPlayer.volume = parseFloat(val);
+  document.getElementById('volumeControl').querySelector('.s-icon').textContent = parseFloat(val) === 0 ? '🔇' : '🔊';
+}
+
+function updateBrightness(val) { 
+  document.getElementById('videoPlayer').style.filter = `brightness(${val})`; 
+}
+
+function closePlayer() {
+  document.getElementById('playerOverlay').classList.remove('active');
+  document.getElementById('videoPlayer').pause();
+  document.getElementById('videoPlayer').src = '';
+  document.getElementById('imagePlayer').src = '';
+  document.getElementById('audioElem').pause();
+  document.getElementById('audioElem').src = '';
+  if (musicProgressInterval) { clearInterval(musicProgressInterval); musicProgressInterval = null; }
+  if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  isMusicMode = false;
+}
+
+function toggleFullscreenPlayer() {
+  const el = document.getElementById('playerOverlay');
+  try {
+    if (!document.fullscreenElement) {
+      el.requestFullscreen();
+      if (screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{});
+    } else {
+      document.exitFullscreen();
+    }
+  } catch (e) { showToast('⛶ Fullscreen not supported'); }
+}
+
+function nextFile() {
+  const idx = currentPlaylist.indexOf(allFiles[currentIndex]);
+  if (idx < currentPlaylist.length - 1) playFile(allFiles.indexOf(currentPlaylist[idx + 1]));
+}
+function prevFile() {
+  const idx = currentPlaylist.indexOf(allFiles[currentIndex]);
+  if (idx > 0) playFile(allFiles.indexOf(currentPlaylist[idx - 1]));
+}
+document.addEventListener('ended', () => {
+  if (document.getElementById('playerOverlay').classList.contains('active')) nextFile();
+}, true);
+
+// ================================================================
+// CAMERA - PREMIUM INSTAGRAM QUALITY WITH REAL BEAUTY+ EFFECTS
+// ================================================================
+let cameraStream = null;
+let facingMode = 'environment';
+let cameraZoom = 1;
+let cameraMode = 'photo';
+let isRecording = false;
+let mediaRecorder = null;
+let recordedChunks = [];
+let recordTimerInterval = null;
+let recordSeconds = 0;
+let beautyFrameId = null;
+let isBeautyActive = false;
+
+// Premium Instagram-style filters with real effects
+const FILTERS = [
+  { id: 'normal', name: 'Normal', css: 'none' },
+  { id: 'beautyplus', name: 'Beauty+', css: 'brightness(1.08) contrast(1.02) saturate(1.12)' },
+  { id: 'summer', name: 'Summer', css: 'saturate(1.45) contrast(1.15) brightness(1.06) hue-rotate(-5deg)' },
+  { id: 'cool', name: 'Cool', css: 'saturate(1.25) contrast(1.05) brightness(1.02) hue-rotate(15deg)' },
+  { id: 'vibrant', name: 'Vibrant', css: 'saturate(1.8) contrast(1.2) brightness(1.04)' },
+  { id: 'white', name: 'White', css: 'brightness(1.5) contrast(1.05) saturate(0.5)' },
+  { id: 'bw', name: 'B&W', css: 'grayscale(1) contrast(1.3) brightness(1.05)' },
+  { id: 'cinematic', name: 'Cinematic', css: 'contrast(1.6) saturate(1.2) brightness(0.88) sepia(0.12) hue-rotate(-3deg)' },
+  { id: 'deep', name: 'Deep', css: 'contrast(1.5) brightness(0.92) saturate(1.3) hue-rotate(-3deg)' }
+];
+
+let currentFilter = 'beautyplus';
+
+function initCameraUI() {
+  const row = document.getElementById('filterRow');
+  row.innerHTML = '';
+  FILTERS.forEach(f => {
+    const item = document.createElement('div');
+    item.className = `filter-item ${f.id === currentFilter ? 'active' : ''}`;
+    const preview = document.createElement('div');
+    preview.className = 'filter-preview';
+    const colors = ['#888', '#ff6b6b', '#feca57', '#48dbfb', '#ff9f43', '#ffffff', '#333333', '#2d2d2d', '#1dd1a1'];
+    const c = colors[FILTERS.indexOf(f) % colors.length];
+    preview.style.background = `linear-gradient(135deg, ${c}, ${c}dd)`;
+    const name = document.createElement('span');
+    name.className = 'filter-name';
+    name.textContent = f.name;
+    item.appendChild(preview); item.appendChild(name);
+    item.onclick = () => {
+      currentFilter = f.id;
+      document.querySelectorAll('.filter-item').forEach(c => c.classList.remove('active'));
+      item.classList.add('active');
+      applyFilterToVideo(currentFilter);
+      showToast(`📸 ${f.name}`);
+    };
+    row.appendChild(item);
+  });
+}
+
+function applyFilterToVideo(filterId) {
+  const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('beautyCanvas');
+  const f = FILTERS.find(f => f.id === filterId) || FILTERS[0];
+  
+  // Premium filters get advanced processing
+  if (filterId === 'beautyplus' || filterId === 'summer' || filterId === 'vibrant' || filterId === 'deep' || filterId === 'cinematic') {
+    isBeautyActive = true;
+    canvas.classList.add('active');
+    video.style.filter = 'none';
+    startBeautyProcessing(filterId);
+  } else {
+    isBeautyActive = false;
+    canvas.classList.remove('active');
+    video.style.filter = f.css;
+    if (beautyFrameId) {
+      cancelAnimationFrame(beautyFrameId);
+      beautyFrameId = null;
+    }
+  }
+}
+
+function startBeautyProcessing(filterId) {
+  const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('beautyCanvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  
+  function processFrame() {
+    if (!isBeautyActive || !video.videoWidth) {
+      beautyFrameId = requestAnimationFrame(processFrame);
+      return;
+    }
+    
+    const w = video.videoWidth || 640;
+    const h = video.videoHeight || 480;
+    canvas.width = w;
+    canvas.height = h;
+    
+    ctx.drawImage(video, 0, 0, w, h);
+    
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const data = imageData.data;
+    
+    // Premium parameters based on filter
+    let brightness = 1.1;
+    let contrast = 1.03;
+    let saturation = 1.18;
+    let skinSmooth = 0.55;
+    let warmth = 0;
+    let isVibrant = false;
+    let isDeep = false;
+    let isSummer = false;
+    let isCinematic = false;
+    let isBeauty = true;
+    
+    if (filterId === 'beautyplus') {
+      brightness = 1.12;
+      contrast = 1.02;
+      saturation = 1.2;
+      skinSmooth = 0.6;
+      isBeauty = true;
+    } else if (filterId === 'summer') {
+      brightness = 1.08;
+      contrast = 1.1;
+      saturation = 1.5;
+      skinSmooth = 0.35;
+      warmth = 10;
+      isSummer = true;
+    } else if (filterId === 'vibrant') {
+      brightness = 1.05;
+      contrast = 1.15;
+      saturation = 1.85;
+      skinSmooth = 0.25;
+      isVibrant = true;
+    } else if (filterId === 'deep') {
+      brightness = 0.92;
+      contrast = 1.55;
+      saturation = 1.35;
+      skinSmooth = 0.2;
+      isDeep = true;
+    } else if (filterId === 'cinematic') {
+      brightness = 0.88;
+      contrast = 1.6;
+      saturation = 1.2;
+      skinSmooth = 0.15;
+      isCinematic = true;
+    }
+    
+    for (let i = 0; i < data.length; i += 4) {
+      let r = data[i];
+      let g = data[i+1];
+      let b = data[i+2];
+      
+      // Brightness
+      r = Math.min(255, Math.max(0, r * brightness));
+      g = Math.min(255, Math.max(0, g * brightness));
+      b = Math.min(255, Math.max(0, b * brightness));
+      
+      // Contrast
+      r = Math.min(255, Math.max(0, 128 + contrast * (r - 128)));
+      g = Math.min(255, Math.max(0, 128 + contrast * (g - 128)));
+      b = Math.min(255, Math.max(0, 128 + contrast * (b - 128)));
+      
+      // Saturation boost
+      const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+      r = Math.min(255, Math.max(0, gray + saturation * (r - gray)));
+      g = Math.min(255, Math.max(0, gray + saturation * (g - gray)));
+      b = Math.min(255, Math.max(0, gray + saturation * (b - gray)));
+      
+      // Warmth for summer
+      if (isSummer) {
+        r = Math.min(255, Math.max(0, r + 15));
+        g = Math.min(255, Math.max(0, g + 8));
+        b = Math.min(255, Math.max(0, b - 10));
+      }
+      
+      // Deep mode - rich shadows
+      if (isDeep) {
+        const darkBoost = Math.min(1, (gray / 128));
+        r = Math.min(255, Math.max(0, r * (1 + darkBoost * 0.18)));
+        g = Math.min(255, Math.max(0, g * (1 + darkBoost * 0.14)));
+        b = Math.min(255, Math.max(0, b * (1 + darkBoost * 0.1)));
+      }
+      
+      // Cinematic - film look
+      if (isCinematic) {
+        r = Math.min(255, Math.max(0, r + (r - gray) * 0.08));
+        g = Math.min(255, Math.max(0, g + (g - gray) * 0.04));
+        b = Math.min(255, Math.max(0, b + (b - gray) * 0.02));
+        // Add slight film grain effect
+        const grain = (Math.random() - 0.5) * 6;
+        r = Math.min(255, Math.max(0, r + grain));
+        g = Math.min(255, Math.max(0, g + grain));
+        b = Math.min(255, Math.max(0, b + grain));
+      }
+      
+      // Vibrant mode
+      if (isVibrant) {
+        r = Math.min(255, Math.max(0, r + (r - gray) * 0.35));
+        g = Math.min(255, Math.max(0, g + (g - gray) * 0.25));
+        b = Math.min(255, Math.max(0, b + (b - gray) * 0.15));
+      }
+      
+      // Advanced skin detection and smoothing (Instagram quality)
+      const isSkin = (r > 90 && g > 40 && b > 20 && 
+                      r > g && r > b && 
+                      Math.abs(r - g) > 12 &&
+                      r < 245 && g < 220 && b < 210);
+      
+      if (isSkin && skinSmooth > 0) {
+        // Premium skin smoothing - multi-level blur for natural look
+        const sampleSize = 4;
+        let sr = 0, sg = 0, sb = 0, count = 0;
+        for (let dy = -sampleSize; dy <= sampleSize; dy++) {
+          for (let dx = -sampleSize; dx <= sampleSize; dx++) {
+            const idx = i + (dy * w * 4) + (dx * 4);
+            if (idx >= 0 && idx < data.length) {
+              sr += data[idx];
+              sg += data[idx+1];
+              sb += data[idx+2];
+              count++;
+            }
+          }
+        }
+        if (count > 0) {
+          const smooth = skinSmooth;
+          const weight = 1 - smooth;
+          data[i] = Math.min(255, Math.max(0, data[i] * weight + (sr / count) * smooth));
+          data[i+1] = Math.min(255, Math.max(0, data[i+1] * weight + (sg / count) * smooth));
+          data[i+2] = Math.min(255, Math.max(0, data[i+2] * weight + (sb / count) * smooth));
+        }
+      }
+      
+      // Beauty mode - additional skin brightening
+      if (isBeauty && isSkin) {
+        data[i] = Math.min(255, Math.max(0, data[i] + 8));
+        data[i+1] = Math.min(255, Math.max(0, data[i+1] + 6));
+        data[i+2] = Math.min(255, Math.max(0, data[i+2] + 4));
+      }
+    }
+    
+    ctx.putImageData(imageData, 0, 0);
+    beautyFrameId = requestAnimationFrame(processFrame);
+  }
+  
+  if (beautyFrameId) cancelAnimationFrame(beautyFrameId);
+  processFrame();
+}
+
+function updateCamBrightness(val) {
+  const canvas = document.getElementById('beautyCanvas');
+  const video = document.getElementById('camera-video');
+  if (isBeautyActive) {
+    canvas.style.filter = `brightness(${val})`;
+  } else {
+    video.style.filter = `brightness(${val})`;
+  }
+}
+
+async function openCamera() {
+  document.getElementById('cameraOverlay').classList.add('active');
+  initCameraUI();
+  document.getElementById('zoomSlider').value = 1;
+  document.getElementById('zoomLabel').textContent = '1.0x';
+  document.getElementById('camBrightnessSlider').value = 1;
+  cameraZoom = 1;
+  
+  const video = document.getElementById('camera-video');
+  video.style.filter = 'none';
+  video.style.transform = 'scale(1)';
+  const canvas = document.getElementById('beautyCanvas');
+  canvas.style.filter = 'none';
+  
+  try {
+    if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+    const constraints = {
+      video: { 
+        facingMode: facingMode, 
+        width: { ideal: 1920 }, 
+        height: { ideal: 1080 }
+      },
+      audio: true
+    };
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (audioErr) {
+      constraints.audio = false;
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    }
+    video.srcObject = cameraStream;
+    await video.play();
+    applyFilterToVideo('beautyplus');
+    showToast('📷 Premium Camera Ready - Instagram Quality');
+  } catch (err) {
+    alert('❌ Camera access denied!');
+    closeCamera();
+  }
+}
+
+function closeCamera() {
+  isBeautyActive = false;
+  if (beautyFrameId) {
+    cancelAnimationFrame(beautyFrameId);
+    beautyFrameId = null;
+  }
+  if (isRecording) stopRecording();
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  document.getElementById('cameraOverlay').classList.remove('active');
+  document.getElementById('camera-video').style.filter = 'none';
+  document.getElementById('beautyCanvas').classList.remove('active');
+}
+
+function switchCamera() {
+  facingMode = facingMode === 'environment' ? 'user' : 'environment';
+  openCamera();
+}
+
+function setCameraMode(mode) {
+  if (isRecording) return;
+  cameraMode = mode;
+  document.getElementById('modePhotoBtn').classList.toggle('active', mode === 'photo');
+  document.getElementById('modeVideoBtn').classList.toggle('active', mode === 'video');
+}
+
+function updateZoom(val) {
+  cameraZoom = parseFloat(val);
+  document.getElementById('zoomLabel').textContent = cameraZoom.toFixed(1) + 'x';
+  const video = document.getElementById('camera-video');
+  const canvas = document.getElementById('beautyCanvas');
+  video.style.transform = `scale(${cameraZoom})`;
+  video.style.transformOrigin = 'center center';
+  canvas.style.transform = `scale(${cameraZoom})`;
+  canvas.style.transformOrigin = 'center center';
+}
+
+function handleShutter() {
+  if (cameraMode === 'photo') takePhoto();
+  else {
+    if (!isRecording) startVideoRecording();
+    else stopRecording();
+  }
+}
+
+function takePhoto() {
+  const flash = document.getElementById('cameraFlash');
+  flash.classList.add('active'); setTimeout(() => flash.classList.remove('active'), 150);
+
+  const video = document.getElementById('camera-video');
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const w = video.videoWidth || 1920;
+  const h = video.videoHeight || 1080;
+  canvas.width = w; canvas.height = h;
+  
+  const beautyCanvas = document.getElementById('beautyCanvas');
+  if (isBeautyActive && beautyCanvas.width > 0) {
+    ctx.drawImage(beautyCanvas, 0, 0, w, h);
+  } else {
+    const f = FILTERS.find(f => f.id === currentFilter) || FILTERS[0];
+    ctx.filter = f.css;
+    ctx.drawImage(video, 0, 0, w, h);
+    ctx.filter = 'none';
+  }
+  
+  canvas.toBlob(async (blob) => {
+    if (!blob) { showToast('❌ Failed to save'); return; }
+    const fileName = `IMG_${Date.now()}.jpg`;
+    const file = new File([blob], fileName, { type: 'image/jpeg' });
+    await saveMediaBlob(file, fileName, 'photo');
+  }, 'image/jpeg', 0.95);
+}
+
+function startVideoRecording() {
+  const video = document.getElementById('camera-video');
+  const stream = video.captureStream ? video.captureStream(30) : cameraStream;
+  isRecording = true; recordedChunks = []; recordSeconds = 0;
+  document.getElementById('recTimer').classList.add('active');
+  document.getElementById('recTimeText').textContent = '00:00';
+  recordTimerInterval = setInterval(() => {
+    recordSeconds++;
+    const m = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+    const s = String(recordSeconds % 60).padStart(2, '0');
+    document.getElementById('recTimeText').textContent = `${m}:${s}`;
+  }, 1000);
+  document.getElementById('shutterBtn').classList.add('recording');
+
+  const mimeCandidates = ['video/mp4;codecs=h264', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+  const mimeType = mimeCandidates.find(m => window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) || 'video/webm';
+  const ext = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
+
+  const audioTracks = cameraStream.getAudioTracks();
+  if (audioTracks.length) {
+    const combinedStream = new MediaStream([...stream.getVideoTracks(), ...audioTracks]);
+    mediaRecorder = new MediaRecorder(combinedStream, { mimeType });
+  } else {
+    mediaRecorder = new MediaRecorder(stream, { mimeType });
+  }
+  
+  mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = async () => {
+    const blob = new Blob(recordedChunks, { type: mimeType });
+    const fileName = `VID_${Date.now()}.${ext}`;
+    const file = new File([blob], fileName, { type: mimeType });
+    await saveMediaBlob(file, fileName, 'video');
+  };
+  mediaRecorder.start();
+  showToast('🔴 Recording...');
+}
+
+function stopRecording() {
+  isRecording = false;
+  clearInterval(recordTimerInterval);
+  document.getElementById('recTimer').classList.remove('active');
+  document.getElementById('shutterBtn').classList.remove('recording');
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+}
+
+async function saveMediaBlob(file, fileName, mediaType) {
+  showLoading(mediaType === 'video' ? '🎥 Saving...' : '📸 Saving...');
+  await saveFiles([file], 'camera');
+  await refreshData();
+  hideLoading();
+  
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: fileName });
+      showToast('✅ Saved!');
+      return;
+    }
+  } catch (shareErr) {}
+  
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(file);
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast('✅ Saved!');
+}
+
+// ================================================================
+// HELPERS
+// ================================================================
+function showToast(msg) {
+  const el = document.getElementById('toastMsg');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+function showLoading(msg) {
+  document.getElementById('loadingText').textContent = msg || 'Loading...';
+  document.getElementById('loadingOverlay').classList.add('active');
+}
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
+
+async function init() { await initDB(); await refreshData(); }
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('playerOverlay').classList.contains('active')) closePlayer();
+    if (document.getElementById('cameraOverlay').classList.contains('active')) closeCamera();
+  }
+  if (e.key === ' ' && document.getElementById('playerOverlay').classList.contains('active')) {
+    e.preventDefault(); togglePlay();
+  }
+});
+
+init();
+</script>
+</body>
+</html>
